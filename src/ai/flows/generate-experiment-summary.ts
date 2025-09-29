@@ -32,15 +32,16 @@ const prompt = ai.definePrompt({
   input: {schema: GenerateExperimentSummaryInputSchema},
   output: {schema: GenerateExperimentSummaryOutputSchema},
   prompt: `You are an AI expert in NASA space biology experiments. Your task is to generate a summary of an experiment based on the user's query. The summary should be tailored to the user's selected mode.
+You must use the most current, real-time data available from NASA. Always cite your sources and provide direct links to the NASA publications or data repositories used.
 
-If the mode is K-12, provide a simplified and engaging summary suitable for students in grades K-12. Use analogies, fun facts, and simple language to explain the experiment's purpose, methodology, and key findings.
+If the mode is K-12, provide a simplified and engaging summary suitable for students in grades K-12. Use analogies, fun facts, and simple language to explain the experiment's purpose, methodology, and key findings. Include links to kid-friendly NASA resources.
 
-If the mode is Pro, provide a technical and detailed summary suitable for college students and professionals. Include references to original NASA publications, key metrics, and relevant data.
+If the mode is Pro, provide a technical and detailed summary suitable for college students and professionals. Include references to original NASA publications, key metrics, and relevant data. Include direct links to the papers and datasets.
 
 User Query: {{{query}}}
 Mode: {{{mode}}}
 
-Summary:`, // Added a label for the summary output to improve clarity
+Summary:`,
 });
 
 const generateExperimentSummaryFlow = ai.defineFlow(
