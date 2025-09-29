@@ -1,9 +1,10 @@
 import type { ProResult } from '@/lib/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BarChart, Download } from 'lucide-react';
+import { BarChart, Download, FileText, Database, Milestone } from 'lucide-react';
 import { Bar, CartesianGrid, XAxis, YAxis, ResponsiveContainer, BarChart as RechartsBarChart } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface ProResultsProps {
   data: ProResult;
@@ -35,6 +36,19 @@ export default function ProResults({ data }: ProResultsProps) {
           <p className="text-base leading-relaxed whitespace-pre-wrap">{data.summary}</p>
         </CardContent>
       </Card>
+
+       <div className="grid md:grid-cols-3 gap-6">
+        {data.keyMetrics.map((metric) => (
+          <Card key={metric.name}>
+            <CardHeader className="pb-2">
+              <CardDescription>{metric.name}</CardDescription>
+              <CardTitle className="text-3xl">
+                {metric.value} <span className="text-sm font-normal text-muted-foreground">{metric.unit}</span>
+              </CardTitle>
+            </CardHeader>
+          </Card>
+        ))}
+      </div>
       
       <Card className="shadow-lg">
         <CardHeader>
@@ -65,6 +79,61 @@ export default function ProResults({ data }: ProResultsProps) {
           </ChartContainer>
         </CardContent>
       </Card>
+
+      <div className="grid md:grid-cols-2 gap-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <FileText className="h-6 w-6" />
+              Related Publications
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Authors</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.publications.map((pub) => (
+                  <TableRow key={pub.title}>
+                    <TableCell><a href={pub.url} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">{pub.title}</a></TableCell>
+                    <TableCell>{pub.authors.join(', ')}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Database className="h-6 w-6" />
+              Data Repositories
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+             <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Description</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.datasets.map((dataset) => (
+                   <TableRow key={dataset.name}>
+                    <TableCell><a href={dataset.url} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">{dataset.name}</a></TableCell>
+                    <TableCell>{dataset.description}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
