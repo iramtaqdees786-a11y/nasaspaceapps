@@ -42,7 +42,7 @@ export default function AppHeader({ mode, setMode }: AppHeaderProps) {
               <Briefcase className="h-4 w-4 mr-2" />
               Pro
             </ToggleGroupItem>
-          </ToggleGroup>>
+          </ToggleGroup>
         )}
       </div>
     </header>
