@@ -1,12 +1,13 @@
-import type { K12Result, Concept } from '@/lib/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { K12Result, Concept, GlossaryTerm } from '@/lib/types';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Lightbulb, BrainCircuit, Dna, Thermometer, ClipboardCheck, FlaskConical, Pencil, BookOpen, Ear, Video, Play, Volume2, Beaker, CheckCircle, XCircle } from 'lucide-react';
+import { Download, Lightbulb, BrainCircuit, Dna, Thermometer, ClipboardCheck, FlaskConical, Pencil, BookOpen, Ear, Video, Play, Volume2, Beaker, CheckCircle, XCircle, BookText } from 'lucide-react';
 import { useState, useTransition, useMemo, useCallback } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { getAudioSummary } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 interface K12ResultsProps {
   data: K12Result;
@@ -170,6 +171,30 @@ function MatchTheConceptsQuiz({ quiz }: { quiz: K12Result['quiz'] }) {
     );
 }
 
+function Glossary({ terms }: { terms: GlossaryTerm[] }) {
+    if (!terms || terms.length === 0) return null;
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                    <BookText className="h-6 w-6" />
+                    Glossary
+                </CardTitle>
+                <CardDescription>Key terms from the summary.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <ul className="space-y-2">
+                    {terms.map(term => (
+                        <li key={term.term} className="text-sm">
+                           <span className="font-bold text-foreground">{term.term}:</span> {term.definition}
+                        </li>
+                    ))}
+                </ul>
+            </CardContent>
+        </Card>
+    )
+}
+
 export default function K12Results({ data }: K12ResultsProps) {
     const [audioSrc, setAudioSrc] = useState<string | null>(null);
     const [isAudioLoading, startAudioTransition] = useTransition();
@@ -245,6 +270,8 @@ export default function K12Results({ data }: K12ResultsProps) {
           </CardContent>
         </Card>
       </div>
+
+       <Glossary terms={data.glossary} />
 
       <div>
         <h3 className="text-2xl font-bold text-center mb-6">Learning Strategies</h3>

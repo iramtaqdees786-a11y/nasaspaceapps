@@ -1,22 +1,52 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search } from 'lucide-react';
+import { Search, Sparkles, Brain } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast"
 
 import AppHeader from '@/components/Header';
 import ResultsDisplay from '@/components/ResultsDisplay';
-import type { SearchResult } from '@/lib/types';
-import { getExperimentData } from '@/app/actions';
+import type { DailyFeature, SearchResult } from '@/lib/types';
+import { getExperimentData, fetchDailyFeature } from '@/app/actions';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+
+function DailyFeatureCard({ feature }: { feature: DailyFeature | null }) {
+  if (!feature) return null;
+
+  const Icon = feature.title === 'Fun Fact of the Day' ? Sparkles : Brain;
+
+  return (
+    <Card className="my-8 bg-accent/10 border-accent/30 animate-in fade-in-50">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-accent">
+          <Icon className="h-6 w-6" />
+          {feature.title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-muted-foreground">{feature.content}</p>
+      </CardContent>
+    </Card>
+  )
+}
 
 export default function AstroBioExplorer() {
   const [mode, setMode] = useState<'K-12' | 'Pro'>('K-12');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult | null>(null);
+  const [dailyFeature, setDailyFeature] = useState<DailyFeature | null>(null);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+
+  useEffect(() => {
+    async function loadDailyFeature() {
+      const feature = await fetchDailyFeature(mode);
+      setDailyFeature(feature);
+    }
+    loadDailyFeature();
+  }, [mode]);
 
   const handleSearch = () => {
     if (!query.trim()) {
@@ -77,7 +107,7 @@ export default function AstroBioExplorer() {
           </div>
         </div>
         
-        <ResultsDisplay isLoading={isPending} results={results} />
+        <ResultsDisplay isLoading={isPending} results={results} dailyFeature={dailyFeature} />
       </main>
       <footer className="py-4 text-center text-sm text-muted-foreground">
         <p>&copy; {new Date().getFullYear()} AstroBio Explorer. Powered by AI.</p>

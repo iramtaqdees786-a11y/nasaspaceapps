@@ -1,26 +1,52 @@
-import type { ProResult } from '@/lib/types';
+import type { ProResult, SourceDocument } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BarChart, Download, FileText, Database, Milestone, FileImage, FileDown } from 'lucide-react';
-import { Bar, CartesianGrid, XAxis, YAxis, ResponsiveContainer, BarChart as RechartsBarChart } from 'recharts';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { BarChart, Download, FileText, Database, Milestone, FileImage, FileDown, TestTube, ChevronsUp, MessageSquareQuote } from 'lucide-react';
 import Image from 'next/image';
 
 interface ProResultsProps {
   data: ProResult;
 }
 
-const chartConfig = {
-  growth: {
-    label: "Growth (%)",
-    color: "hsl(var(--chart-1))",
-  },
-  radiation: {
-    label: "Radiation (mSv)",
-    color: "hsl(var(--chart-2))",
-  },
-};
+function SectionCard({ title, icon, children }: { title: string, icon: React.ReactNode, children: React.ReactNode }) {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                    {icon}
+                    {title}
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                {children}
+            </CardContent>
+        </Card>
+    );
+}
+
+function SourceList({ sources }: { sources: SourceDocument[] }) {
+    if (!sources || sources.length === 0) return null;
+
+    return (
+        <SectionCard title="Sources" icon={<MessageSquareQuote className="h-6 w-6" />}>
+            <div className="space-y-4">
+                {sources.map((source, index) => (
+                    <div key={index} className="p-4 border rounded-lg bg-muted/50">
+                        <h4 className="font-bold mb-1">
+                            <a href={source.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                {source.title}
+                            </a>
+                        </h4>
+                        <blockquote className="border-l-4 border-accent pl-3 italic text-muted-foreground">
+                            "{source.snippet}"
+                        </blockquote>
+                    </div>
+                ))}
+            </div>
+        </SectionCard>
+    );
+}
+
 
 export default function ProResults({ data }: ProResultsProps) {
   return (
@@ -52,6 +78,17 @@ export default function ProResults({ data }: ProResultsProps) {
           </Card>
         ))}
       </div>
+      
+      <div className="grid md:grid-cols-2 gap-8">
+        <SectionCard title="Methodology" icon={<TestTube className="h-6 w-6" />}>
+            <p className="text-sm text-muted-foreground">{data.methodology}</p>
+        </SectionCard>
+         <SectionCard title="Future Research" icon={<ChevronsUp className="h-6 w-6" />}>
+            <p className="text-sm text-muted-foreground">{data.futureResearch}</p>
+        </SectionCard>
+      </div>
+
+      <SourceList sources={data.sources} />
       
       <Card className="shadow-lg">
         <CardHeader>

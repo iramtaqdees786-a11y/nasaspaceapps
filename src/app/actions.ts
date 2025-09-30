@@ -3,7 +3,8 @@
 import { generateExperimentSummary } from '@/ai/flows/generate-experiment-summary';
 import { createK12Analogy } from '@/ai/flows/create-k12-analogy';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
-import type { AudioResult, K12Result, ProResult } from '@/lib/types';
+import { getDailyFeature } from '@/ai/flows/get-daily-feature';
+import type { AudioResult, DailyFeature, K12Result, ProResult } from '@/lib/types';
 
 export async function getExperimentData(query: string, mode: 'K-12' | 'Pro'): Promise<K12Result | ProResult> {
   if (!query) {
@@ -22,6 +23,7 @@ export async function getExperimentData(query: string, mode: 'K-12' | 'Pro'): Pr
         summary: summaryResult.summary,
         analogy: analogyResult.analogy,
         memoryTrick: analogyResult.memoryTrick,
+        glossary: summaryResult.glossary || [],
         conceptMap: {
           centralTopic: query,
           relatedConcepts: [
@@ -59,6 +61,9 @@ export async function getExperimentData(query: string, mode: 'K-12' | 'Pro'): Pr
       return {
         mode: 'Pro',
         summary: summaryResult.summary,
+        methodology: summaryResult.methodology || 'Methodology details are not available for this experiment.',
+        futureResearch: summaryResult.futureResearch || 'Future research directions have not been specified.',
+        sources: summaryResult.sources || [],
         chartData: [
           { name: 'Day 1', growth: 40, radiation: 24 },
           { name: 'Day 7', growth: 30, radiation: 13 },
@@ -102,5 +107,18 @@ export async function getAudioSummary(text: string): Promise<AudioResult> {
     } catch (error) {
         console.error('Error generating audio summary:', error);
         throw new Error('Failed to generate audio. Please try again.');
+    }
+}
+
+export async function fetchDailyFeature(mode: 'K-12' | 'Pro'): Promise<DailyFeature> {
+    try {
+        const feature = await getDailyFeature({ mode });
+        return feature;
+    } catch (error) {
+        console.error('Error fetching daily feature:', error);
+        return {
+            title: 'Content not available',
+            content: 'Could not load the daily feature. Please try again later.'
+        };
     }
 }

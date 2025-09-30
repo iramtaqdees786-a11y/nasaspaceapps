@@ -4,11 +4,17 @@ export type Concept = {
   icon: string;
 };
 
+export type GlossaryTerm = {
+  term: string;
+  definition: string;
+}
+
 export type K12Result = {
   mode: 'K-12';
   summary: string;
   analogy: string;
   memoryTrick: string;
+  glossary: GlossaryTerm[];
   conceptMap: {
     centralTopic: string;
     relatedConcepts: Concept[];
@@ -39,9 +45,18 @@ export type KeyMetric = {
   unit: string;
 };
 
+export type SourceDocument = {
+  title: string;
+  url: string;
+  snippet: string;
+};
+
 export type ProResult = {
   mode: 'Pro';
   summary: string;
+  methodology: string;
+  futureResearch: string;
+  sources: SourceDocument[];
   chartData: { name: string; [key: string]: any }[];
   publications: Publication[];
   datasets: DataSet[];
@@ -55,4 +70,9 @@ export type SearchResult = K12Result | ProResult;
 
 export type AudioResult = {
   media: string;
+};
+
+export type DailyFeature = {
+    title: string;
+    content: string;
 };
