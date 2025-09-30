@@ -13,6 +13,12 @@ export type K12Result = {
     centralTopic: string;
     relatedConcepts: Concept[];
   };
+  quiz: {
+    title: string;
+    concepts: { id: string; text: string }[];
+    definitions: { id: string; text: string }[];
+    correctPairs: { conceptId: string; definitionId: string }[];
+  }
 };
 
 export type Publication = {
@@ -40,6 +46,9 @@ export type ProResult = {
   publications: Publication[];
   datasets: DataSet[];
   keyMetrics: KeyMetric[];
+  chartDescription: string;
+  chartImageUrl: string;
+  pdfUrl: string;
 };
 
 export type SearchResult = K12Result | ProResult;

@@ -1,10 +1,11 @@
 import type { ProResult } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BarChart, Download, FileText, Database, Milestone } from 'lucide-react';
+import { BarChart, Download, FileText, Database, Milestone, FileImage, FileDown } from 'lucide-react';
 import { Bar, CartesianGrid, XAxis, YAxis, ResponsiveContainer, BarChart as RechartsBarChart } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import Image from 'next/image';
 
 interface ProResultsProps {
   data: ProResult;
@@ -27,10 +28,12 @@ export default function ProResults({ data }: ProResultsProps) {
       <Card className="shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-2xl">Technical Summary</CardTitle>
-          <Button variant="outline" size="sm">
-            <Download className="mr-2 h-4 w-4" />
-            Export Data
-          </Button>
+          <a href={data.pdfUrl} download="report.pdf">
+            <Button variant="outline" size="sm">
+              <FileDown className="mr-2 h-4 w-4" />
+              Download Report (PDF)
+            </Button>
+          </a>
         </CardHeader>
         <CardContent>
           <p className="text-base leading-relaxed whitespace-pre-wrap">{data.summary}</p>
@@ -56,27 +59,18 @@ export default function ProResults({ data }: ProResultsProps) {
             <BarChart className="h-6 w-6" />
             Data Visualization
           </CardTitle>
+          <CardDescription>{data.chartDescription}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-            <RechartsBarChart accessibilityLayer data={data.chartData}>
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="name"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-                tickFormatter={(value) => value.slice(0, 6)}
-              />
-              <YAxis />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent indicator="dot" />}
-              />
-              <Bar dataKey="growth" fill="var(--color-growth)" radius={4} />
-              <Bar dataKey="radiation" fill="var(--color-radiation)" radius={4} />
-            </RechartsBarChart>
-          </ChartContainer>
+        <CardContent className="space-y-4">
+            <div className="aspect-video w-full rounded-lg border overflow-hidden">
+                 <Image src={data.chartImageUrl} alt="Data Visualization Chart" width={800} height={400} className="object-cover" />
+            </div>
+            <a href={data.chartImageUrl} download="chart.png">
+                <Button variant="outline" size="sm">
+                    <FileImage className="mr-2 h-4 w-4" />
+                    Download Chart (PNG)
+                </Button>
+            </a>
         </CardContent>
       </Card>
 

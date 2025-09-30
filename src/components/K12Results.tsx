@@ -1,11 +1,12 @@
 import type { K12Result, Concept } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Lightbulb, BrainCircuit, Dna, Thermometer, ClipboardCheck, FlaskConical, Pencil, BookOpen, Ear, Video, Play, Volume2, Beaker } from 'lucide-react';
-import { useState, useTransition } from 'react';
+import { Download, Lightbulb, BrainCircuit, Dna, Thermometer, ClipboardCheck, FlaskConical, Pencil, BookOpen, Ear, Video, Play, Volume2, Beaker, CheckCircle, XCircle } from 'lucide-react';
+import { useState, useTransition, useMemo, useCallback } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { getAudioSummary } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 interface K12ResultsProps {
   data: K12Result;
@@ -71,42 +72,105 @@ function LearningStrategy({ title, icon, children }: { title: string, icon: stri
     )
 }
 
-function Quiz({ question, answer, onAnswer }: { question: string, answer: string, onAnswer: (isCorrect: boolean) => void }) {
-    const [selected, setSelected] = useState<string | null>(null);
-    const [submitted, setSubmitted] = useState(false);
-    const options = React.useMemo(() => {
-        const otherOptions = ["A different answer", "Another choice", "Not this one"];
-        return [answer, ...otherOptions.slice(0, 2)].sort(() => Math.random() - 0.5);
-    }, [answer]);
+function MatchTheConceptsQuiz({ quiz }: { quiz: K12Result['quiz'] }) {
+    const [shuffledDefs, setShuffledDefs] = useState(() => [...quiz.definitions].sort(() => Math.random() - 0.5));
+    const [selectedConcept, setSelectedConcept] = useState<string | null>(null);
+    const [matches, setMatches] = useState<Record<string, string>>({});
+    const [results, setResults] = useState<Record<string, boolean>>({});
+    const [isFinished, setIsFinished] = useState(false);
 
-    const handleSubmit = () => {
-        if (selected === null) return;
-        setSubmitted(true);
-        onAnswer(selected === answer);
+    const handleConceptClick = (conceptId: string) => {
+        if (isFinished) return;
+        if (matches[conceptId]) return;
+        setSelectedConcept(conceptId);
     };
 
+    const handleDefinitionClick = (definitionId: string) => {
+        if (isFinished || !selectedConcept || Object.values(matches).includes(definitionId)) return;
+        
+        const newMatches = {...matches, [selectedConcept]: definitionId };
+        setMatches(newMatches);
+        setSelectedConcept(null);
+    };
+
+    const checkAnswers = () => {
+        const newResults: Record<string, boolean> = {};
+        quiz.correctPairs.forEach(pair => {
+            newResults[pair.conceptId] = matches[pair.conceptId] === pair.definitionId;
+        });
+        setResults(newResults);
+        setIsFinished(true);
+    };
+
+    const resetQuiz = () => {
+        setMatches({});
+        setResults({});
+        setSelectedConcept(null);
+        setIsFinished(false);
+        setShuffledDefs([...quiz.definitions].sort(() => Math.random() - 0.5));
+    };
+    
+    const allMatched = Object.keys(matches).length === quiz.concepts.length;
+    const score = Object.values(results).filter(Boolean).length;
+
     return (
-        <div className="space-y-3">
-            <p className="font-semibold">{question}</p>
-            <div className="flex flex-col gap-2">
-                {options.map((opt, i) => (
-                    <Button
-                        key={i}
-                        variant={submitted ? (opt === answer ? 'default' : (opt === selected ? 'destructive' : 'outline')) : 'outline'}
-                        onClick={() => !submitted && setSelected(opt)}
-                        className="justify-start"
-                    >
-                        {opt}
-                    </Button>
-                ))}
-            </div>
-            <Button onClick={handleSubmit} disabled={submitted || selected === null}>Check Answer</Button>
-        </div>
+        <Card>
+            <CardHeader>
+                <CardTitle>{quiz.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="grid grid-cols-2 gap-4 md:gap-8">
+                    {/* Concepts Column */}
+                    <div className="flex flex-col gap-2">
+                        {quiz.concepts.map(concept => (
+                            <Button
+                                key={concept.id}
+                                variant={selectedConcept === concept.id ? "secondary" : "outline"}
+                                className={cn(
+                                    "h-auto justify-start text-left whitespace-normal py-2",
+                                    isFinished && (results[concept.id] ? "border-green-500" : "border-red-500"),
+                                    matches[concept.id] && !isFinished && "bg-accent/20"
+                                )}
+                                onClick={() => handleConceptClick(concept.id)}
+                            >
+                                {isFinished && (results[concept.id] ? <CheckCircle className="mr-2 text-green-500" /> : <XCircle className="mr-2 text-red-500" />)}
+                                {concept.text}
+                            </Button>
+                        ))}
+                    </div>
+                    {/* Definitions Column */}
+                    <div className="flex flex-col gap-2">
+                         {shuffledDefs.map(def => (
+                            <Button
+                                key={def.id}
+                                variant="outline"
+                                className={cn(
+                                    "h-auto justify-start text-left whitespace-normal py-2",
+                                    Object.values(matches).includes(def.id) && !isFinished && "bg-accent/20"
+                                )}
+                                onClick={() => handleDefinitionClick(def.id)}
+                            >
+                                {def.text}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
+                 <div className="mt-6 flex items-center justify-between">
+                    {!isFinished ? (
+                        <Button onClick={checkAnswers} disabled={!allMatched}>Check Answers</Button>
+                    ) : (
+                        <div className="flex items-center gap-4">
+                            <Button onClick={resetQuiz}>Play Again</Button>
+                             <p className="font-bold text-lg">Your Score: {score}/{quiz.concepts.length}</p>
+                        </div>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
     );
 }
 
 export default function K12Results({ data }: K12ResultsProps) {
-    const [quizResult, setQuizResult] = useState<boolean | null>(null);
     const [audioSrc, setAudioSrc] = useState<string | null>(null);
     const [isAudioLoading, startAudioTransition] = useTransition();
     const { toast } = useToast();
@@ -193,20 +257,7 @@ export default function K12Results({ data }: K12ResultsProps) {
                     </CardTitle>
                 </AccordionTrigger>
                 <AccordionContent>
-                    <Card>
-                        <CardContent className="pt-6">
-                            <Quiz
-                                question={`What is the main topic of the experiment on "${data.conceptMap.centralTopic}"?`}
-                                answer={data.conceptMap.centralTopic}
-                                onAnswer={setQuizResult}
-                            />
-                            {quizResult !== null && (
-                                <p className={`mt-4 font-bold ${quizResult ? 'text-green-500' : 'text-red-500'}`}>
-                                    {quizResult ? "Correct! Great job!" : "Not quite, try again or review the summary."}
-                                </p>
-                            )}
-                        </CardContent>
-                    </Card>
+                    <MatchTheConceptsQuiz quiz={data.quiz} />
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">

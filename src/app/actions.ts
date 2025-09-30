@@ -31,6 +31,27 @@ export async function getExperimentData(query: string, mode: 'K-12' | 'Pro'): Pr
             { title: 'Applications', details: 'Earth & space applications', icon: 'flask-conical' },
           ],
         },
+        quiz: {
+            title: "Match the Space Bio Concepts!",
+            concepts: [
+                {id: "c1", text: "Microgravity"},
+                {id: "c2", text: "DNA"},
+                {id: "c3", text: "Photosynthesis"},
+                {id: "c4", text: "Cosmic Radiation"}
+            ],
+            definitions: [
+                {id: "d1", text: "Genetic blueprint of an organism."},
+                {id: "d2", text: "High-energy particles from space."},
+                {id: "d3", text: "Process plants use to make food from light."},
+                {id: "d4", text: "The condition of being 'weightless'."}
+            ],
+            correctPairs: [
+                {conceptId: "c1", definitionId: "d4"},
+                {conceptId: "c2", definitionId: "d1"},
+                {conceptId: "c3", definitionId: "d3"},
+                {conceptId: "c4", definitionId: "d2"}
+            ]
+        }
       };
     } else {
       const summaryResult = await summaryPromise;
@@ -59,7 +80,10 @@ export async function getExperimentData(query: string, mode: 'K-12' | 'Pro'): Pr
             { name: 'Total Sample Size', value: '150', unit: 'plants' },
             { name: 'Mission Duration', value: '42', unit: 'days' },
             { name: 'Avg. Radiation', value: '5.6', unit: 'mGy/day' },
-        ]
+        ],
+        chartDescription: "The bar chart visualizes plant growth percentage and radiation exposure (mSv) over a 42-day period. Plant growth fluctuates, showing a notable dip around Day 14, which corresponds to a spike in radiation levels, suggesting a potential correlation between high radiation and reduced growth.",
+        chartImageUrl: "https://picsum.photos/seed/chart1/800/400",
+        pdfUrl: "/placeholder.pdf"
       };
     }
   } catch (error) {
