@@ -1,21 +1,30 @@
 'use client';
 
-import { useState, useTransition, useEffect } from 'react';
+import { useState, useTransition, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Sparkles, Brain } from 'lucide-react';
+import { Search, Sparkles, Brain, ArrowRight } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast"
 
 import AppHeader from '@/components/Header';
 import ResultsDisplay from '@/components/ResultsDisplay';
-import type { DailyFeature, SearchResult } from '@/lib/types';
+import type { DailyFeature, SearchResult } from '@/app/actions';
 import { getExperimentData, fetchDailyFeature } from '@/app/actions';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
-function DailyFeatureCard({ feature }: { feature: DailyFeature | null }) {
+function DailyFeatureCard({ 
+  feature, 
+  onDiveDeeper, 
+  mode 
+}: { 
+  feature: DailyFeature | null;
+  onDiveDeeper: (topic: string) => void;
+  mode: 'K-12' | 'Pro';
+}) {
   if (!feature) return null;
 
   const Icon = feature.title === 'Fun Fact of the Day' ? Sparkles : Brain;
+  const buttonText = mode === 'K-12' ? 'Learn more about it!' : 'Dive Deep';
 
   return (
     <Card className="my-8 bg-accent/10 border-accent/30 animate-in fade-in-50">
@@ -26,7 +35,11 @@ function DailyFeatureCard({ feature }: { feature: DailyFeature | null }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground">{feature.content}</p>
+        <p className="text-muted-foreground mb-4">{feature.content}</p>
+        <Button variant="ghost" className="text-accent hover:text-accent-foreground" onClick={() => onDiveDeeper(feature.content)}>
+          {buttonText}
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
       </CardContent>
     </Card>
   )
@@ -48,8 +61,8 @@ export default function AstroBioExplorer() {
     loadDailyFeature();
   }, [mode]);
 
-  const handleSearch = () => {
-    if (!query.trim()) {
+  const performSearch = useCallback((currentQuery: string) => {
+    if (!currentQuery.trim()) {
       toast({
         title: "Search field is empty",
         description: "Please enter a topic to search for.",
@@ -60,7 +73,7 @@ export default function AstroBioExplorer() {
 
     startTransition(async () => {
       try {
-        const data = await getExperimentData(query, mode);
+        const data = await getExperimentData(currentQuery, mode);
         setResults(data);
       } catch (error) {
         let message = 'An unknown error occurred.';
@@ -75,7 +88,17 @@ export default function AstroBioExplorer() {
         })
       }
     });
+  }, [mode, toast]);
+
+
+  const handleSearch = () => {
+    performSearch(query);
   };
+  
+  const handleDailyFeatureSearch = (topic: string) => {
+    setQuery(topic);
+    performSearch(topic);
+  }
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-background">
@@ -107,7 +130,13 @@ export default function AstroBioExplorer() {
           </div>
         </div>
         
-        <ResultsDisplay isLoading={isPending} results={results} dailyFeature={dailyFeature} />
+        <ResultsDisplay 
+          isLoading={isPending} 
+          results={results} 
+          dailyFeature={dailyFeature} 
+          onDiveDeeper={handleDailyFeatureSearch}
+          mode={mode}
+        />
       </main>
       <footer className="py-4 text-center text-sm text-muted-foreground">
         <p>&copy; {new Date().getFullYear()} AstroBio Explorer. Powered by AI.</p>

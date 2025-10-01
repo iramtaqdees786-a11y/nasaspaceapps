@@ -1,20 +1,32 @@
-import type { SearchResult, DailyFeature } from '@/lib/types';
+import type { DailyFeature, SearchResult } from '@/app/actions';
 import K12Results from '@/components/K12Results';
 import ProResults from '@/components/ProResults';
 import ResultsSkeleton from '@/components/ResultsSkeleton';
-import { Rocket, Sparkles, Brain } from 'lucide-react';
+import { Rocket, Sparkles, Brain, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Button } from './ui/button';
 
 interface ResultsDisplayProps {
   isLoading: boolean;
   results: SearchResult | null;
   dailyFeature: DailyFeature | null;
+  onDiveDeeper: (topic: string) => void;
+  mode: 'K-12' | 'Pro';
 }
 
-function DailyFeatureCard({ feature }: { feature: DailyFeature | null }) {
+function DailyFeatureCard({ 
+  feature, 
+  onDiveDeeper,
+  mode 
+}: { 
+  feature: DailyFeature | null;
+  onDiveDeeper: (topic: string) => void;
+  mode: 'K-12' | 'Pro';
+}) {
   if (!feature) return null;
 
   const Icon = feature.title.includes('Fun Fact') ? Sparkles : Brain;
+  const buttonText = mode === 'K-12' ? 'Learn more about it!' : 'Dive Deep';
 
   return (
     <Card className="my-8 bg-accent/10 border-accent/30">
@@ -25,13 +37,17 @@ function DailyFeatureCard({ feature }: { feature: DailyFeature | null }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground">{feature.content}</p>
+        <p className="text-muted-foreground mb-4">{feature.content}</p>
+         <Button variant="ghost" className="text-accent hover:text-accent-foreground" onClick={() => onDiveDeeper(feature.content)}>
+          {buttonText}
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
       </CardContent>
     </Card>
   )
 }
 
-export default function ResultsDisplay({ isLoading, results, dailyFeature }: ResultsDisplayProps) {
+export default function ResultsDisplay({ isLoading, results, dailyFeature, onDiveDeeper, mode }: ResultsDisplayProps) {
   if (isLoading) {
     return <ResultsSkeleton />;
   }
@@ -46,7 +62,7 @@ export default function ResultsDisplay({ isLoading, results, dailyFeature }: Res
         <p className="mt-1 text-sm text-muted-foreground">
           Results from your query will appear here.
         </p>
-        <DailyFeatureCard feature={dailyFeature} />
+        <DailyFeatureCard feature={dailyFeature} onDiveDeeper={onDiveDeeper} mode={mode} />
       </div>
     );
   }
