@@ -151,16 +151,16 @@ Mode: {{{mode}}}
 
 *   **If Mode is 'K-12'**:
     *   Generate all content to be engaging, simple, and suitable for a K-12 audience.
-    *   The `glossary`, `conceptMap`, `quiz`, `learningStyles`, and `activities` must be directly and creatively related to the user's query.
+    *   The 'glossary', 'conceptMap', 'quiz', 'learningStyles', and 'activities' must be directly and creatively related to the user's query.
     *   Ensure the quiz is a simple matching game with 4 concepts and 4 definitions.
     *   The analogy and memory trick should be fun and easy to remember.
 
 *   **If Mode is 'Pro'**:
     *   Generate all content to be technical, detailed, and suitable for university students and researchers.
-    *   The `summary` text MUST include inline citations (e.g., "[1]", "[2]") that correspond to the `sources` array. The 0-indexed position in the array maps to the citation number (e.g., sources[0] is citation "[1]").
-    *   The `sources` array must contain at least 3 real, verifiable source documents with direct quotes as snippets.
-    *   The `chart` data should be realistic and plausible for the given experiment.
-    *   The `researchNavigator` content must be populated with real, relevant studies and datasets from official sources.
+    *   The 'summary' text MUST include inline citations (e.g., "[1]", "[2]") that correspond to the 'sources' array. The 0-indexed position in the array maps to the citation number (e.g., sources[0] is citation "[1]").
+    *   The 'sources' array must contain at least 3 real, verifiable source documents with direct quotes as snippets.
+    *   The 'chart' data should be realistic and plausible for the given experiment.
+    *   The 'researchNavigator' content must be populated with real, relevant studies and datasets from official sources.
 
 Please generate the full output object according to the specified schema for the given mode.`,
 });
