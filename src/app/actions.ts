@@ -1,11 +1,13 @@
 'use server';
 
-import { generateInteractiveContent } from '@/ai/flows/generate-interactive-content';
+import { generateK12Content } from '@/ai/flows/generate-k12-content';
+import { generateProContent } from '@/ai/flows/generate-pro-content';
 import { generatePdfReport } from '@/ai/flows/generate-pdf-report';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { getDailyFeature } from '@/ai/flows/get-daily-feature';
-import type { z } from 'zod';
-import type { GenerateInteractiveContentOutput } from '@/ai/flows/generate-interactive-content';
+import type { K12Result as K12ContentType } from '@/ai/flows/generate-k12-content';
+import type { ProResult as ProContentType } from '@/ai/flows/generate-pro-content';
+
 
 // Re-defining schemas here to avoid client-side import of server code.
 
@@ -28,33 +30,7 @@ export type GlossaryTerm = {
   definition: string;
 };
 
-export type K12Result = {
-  mode: 'K-12';
-  introduction: string;
-  summary: string;
-  conclusion: string;
-  analogy: string;
-  memoryTrick: string;
-  glossary: GlossaryTerm[];
-  conceptMap: {
-    centralTopic: string;
-    relatedConcepts: Concept[];
-  };
-  quiz: {
-    title: string;
-    concepts: { id: string; text: string }[];
-    definitions: { id: string; text: string }[];
-    correctPairs: { conceptId: string; definitionId: string }[];
-  };
-  learningStyles: {
-    style: 'Visual' | 'Auditory' | 'Reading/Writing' | 'Kinesthetic';
-    suggestion: string;
-  }[];
-  activities: {
-    title: string;
-    description: string;
-  }[];
-};
+export type K12Result = K12ContentType & { mode: 'K-12' };
 
 // PRO
 export type KeyMetric = {
@@ -75,28 +51,7 @@ export type DataSet = {
   description: string;
 }
 
-export type ProResult = {
-  mode: 'Pro';
-  introduction: string;
-  summary: string;
-  methodology: string;
-  futureResearch: string;
-  conclusion: string;
-  sources: SourceDocument[];
-  keyMetrics: KeyMetric[];
-  chart: {
-    data: { name: string; value1: number; value2: number }[];
-    description: string;
-    xAxisLabel: string;
-    yAxisLabel1: string;
-    yAxisLabel2: string;
-  };
-  researchNavigator: {
-    relatedStudies: Publication[];
-    dataRepositories: DataSet[];
-    keyPublications: Publication[];
-  }
-};
+export type ProResult = ProContentType & { mode: 'Pro' };
 
 export type SearchResult = K12Result | ProResult;
 
@@ -115,10 +70,13 @@ export async function getExperimentData(query: string, mode: 'K-12' | 'Pro'): Pr
   }
 
   try {
-    const result = await generateInteractiveContent({ query, mode });
-    
-    // The result from the flow already includes the 'mode' property.
-    return result as SearchResult;
+    if (mode === 'K-12') {
+        const result = await generateK12Content({ query });
+        return { ...result, mode: 'K-12' };
+    } else {
+        const result = await generateProContent({ query });
+        return { ...result, mode: 'Pro' };
+    }
 
   } catch (error) {
     console.error('Error fetching experiment data:', error);
