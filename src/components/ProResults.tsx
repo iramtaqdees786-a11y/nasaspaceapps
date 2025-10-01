@@ -3,8 +3,8 @@
 import type { ProResult, SourceDocument, Publication, DataSet, SearchResult } from '@/app/actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BarChart, BookCopy, Database, FileDown, TestTube, ChevronsUp, MessageSquareQuote, Play, Volume2, Pause, Users, Calendar, Radiation } from 'lucide-react';
-import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, TooltipProps } from 'recharts';
+import { BarChart2, BookCopy, Database, FileDown, TestTube, ChevronsUp, MessageSquareQuote, Play, Volume2, Pause, Users, Calendar, Radiation } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, TooltipProps } from 'recharts';
 import { useState, useTransition, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getAudioSummary, getPdfReportContent } from '@/app/actions';
@@ -239,9 +239,9 @@ export default function ProResults({ data, query }: ProResultsProps) {
                 ))}
             </div>
 
-            <SectionCard title="Data Visualization" icon={<BarChart className="h-6 w-6" />} description={data.chart.description}>
+            <SectionCard title="Data Visualization" icon={<BarChart2 className="h-6 w-6" />} description={data.chart.description}>
                 <div className="h-96 w-full">
-                    <ResponsiveContainer>
+                    <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={data.chart.data}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="name" label={{ value: data.chart.xAxisLabel, position: 'insideBottom', offset: -5 }} />
