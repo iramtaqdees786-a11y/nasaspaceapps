@@ -1,178 +1,262 @@
-import type { ProResult, SourceDocument } from '@/lib/types';
+'use client';
+
+import type { ProResult, SourceDocument, Publication, DataSet, SearchResult } from '@/app/actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BarChart, Download, FileText, Database, Milestone, FileImage, FileDown, TestTube, ChevronsUp, MessageSquareQuote } from 'lucide-react';
-import Image from 'next/image';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/components/ui/table';
+import { BarChart, BookCopy, Database, FileDown, TestTube, ChevronsUp, MessageSquareQuote, Play, Volume2, Pause, Users, Calendar, Radiation } from 'lucide-react';
+import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, TooltipProps } from 'recharts';
+import { useState, useTransition, useRef } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { getAudioSummary, getPdfReportContent } from '@/app/actions';
+import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ProResultsProps {
   data: ProResult;
+  query: string;
 }
 
-function SectionCard({ title, icon, children }: { title: string, icon: React.ReactNode, children: React.ReactNode }) {
+function SectionCard({ title, icon, description, children, actions }: { title: string, icon: React.ReactNode, description?: string, children: React.ReactNode, actions?:React.ReactNode }) {
     return (
-        <Card>
+        <Card className="shadow-sm">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                    {icon}
-                    {title}
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                {children}
-            </CardContent>
-        </Card>
-    );
-}
-
-function SourceList({ sources }: { sources: SourceDocument[] }) {
-    if (!sources || sources.length === 0) return null;
-
-    return (
-        <SectionCard title="Sources" icon={<MessageSquareQuote className="h-6 w-6" />}>
-            <div className="space-y-4">
-                {sources.map((source, index) => (
-                    <div key={index} className="p-4 border rounded-lg bg-muted/50">
-                        <h4 className="font-bold mb-1">
-                            <a href={source.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                                {source.title}
-                            </a>
-                        </h4>
-                        <blockquote className="border-l-4 border-accent pl-3 italic text-muted-foreground">
-                            "{source.snippet}"
-                        </blockquote>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <CardTitle className="flex items-center gap-2 text-xl">
+                            {icon}
+                            {title}
+                        </CardTitle>
+                        {description && <CardDescription className="mt-1">{description}</CardDescription>}
                     </div>
-                ))}
-            </div>
-        </SectionCard>
+                    {actions && <div className="flex-shrink-0">{actions}</div>}
+                </div>
+            </CardHeader>
+            <CardContent>{children}</CardContent>
+        </Card>
     );
 }
 
+function AudioPlayer({ text }: { text: string }) {
+    const [audioSrc, setAudioSrc] = useState<string | null>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isLoading, startTransition] = useTransition();
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const { toast } = useToast();
 
-export default function ProResults({ data }: ProResultsProps) {
+    const handlePlayPause = async () => {
+        if (isPlaying) {
+            audioRef.current?.pause();
+            setIsPlaying(false);
+            return;
+        }
+
+        if (audioSrc) {
+            audioRef.current?.play();
+            setIsPlaying(true);
+            return;
+        }
+
+        startTransition(async () => {
+            try {
+                const result = await getAudioSummary(text);
+                setAudioSrc(result.media);
+                const audio = new Audio(result.media);
+                audioRef.current = audio;
+                audio.play();
+                audio.onended = () => setIsPlaying(false);
+                setIsPlaying(true);
+            } catch (error) {
+                toast({
+                    title: "Audio Error",
+                    description: "Could not generate audio for the summary.",
+                    variant: "destructive",
+                });
+            }
+        });
+    };
+    const Icon = isPlaying ? Pause : Play;
+    return (
+        <Button variant="outline" size="sm" onClick={handlePlayPause} disabled={isLoading}>
+            <Icon className="mr-2 h-4 w-4" />
+            {isLoading ? 'Generating...' : (isPlaying ? 'Pause' : 'Listen')}
+        </Button>
+    );
+}
+
+function ResearchNavigator({ navigator }: { navigator: ProResult['researchNavigator'] }) {
+    return (
+        <div className="w-full md:w-80 lg:w-96 flex-shrink-0 space-y-6">
+             <SectionCard title="Related Studies" icon={<BookCopy className="h-5 w-5" />} description="From NASA Task Book">
+                <ul className="space-y-3 text-sm">
+                    {navigator.relatedStudies.map((study, i) => (
+                        <li key={i} className="group">
+                           <a href={study.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary group-hover:underline">{study.title}</a>
+                           <p className="text-xs text-muted-foreground">Authors: {study.authors.join(', ')}</p>
+                        </li>
+                    ))}
+                </ul>
+            </SectionCard>
+            <SectionCard title="Data Repositories" icon={<Database className="h-5 w-5" />} >
+                <ul className="space-y-3 text-sm">
+                    {navigator.dataRepositories.map((repo, i) => (
+                        <li key={i} className="group">
+                           <a href={repo.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary group-hover:underline">{repo.name}</a>
+                           <p className="text-xs text-muted-foreground">{repo.description}</p>
+                        </li>
+                    ))}
+                </ul>
+            </SectionCard>
+            <SectionCard title="Key Publications" icon={<MessageSquareQuote className="h-5 w-5" />} >
+                <ul className="space-y-3 text-sm">
+                    {navigator.keyPublications.map((pub, i) => (
+                        <li key={i} className="group">
+                           <a href={pub.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary group-hover:underline">{pub.title}</a>
+                           <p className="text-xs text-muted-foreground">Authors: {pub.authors.join(', ')}</p>
+                        </li>
+                    ))}
+                </ul>
+            </SectionCard>
+        </div>
+    )
+}
+
+export default function ProResults({ data, query }: ProResultsProps) {
+    const { toast } = useToast();
+    const [isPdfLoading, startPdfTransition] = useTransition();
+
+    const handleDownloadReport = () => {
+        startPdfTransition(async () => {
+            toast({
+                title: "Generating Report",
+                description: "This may take a minute. The download will start automatically."
+            })
+            try {
+                const reportContent = await getPdfReportContent(query);
+                // In a real app, you'd convert this JSON to a PDF.
+                // For now, we'll download the JSON content.
+                const blob = new Blob([JSON.stringify(reportContent, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${query.replace(/\s+/g, '_')}_report.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                 toast({
+                    title: "Report Content Generated",
+                    description: "Report data has been downloaded as a JSON file.",
+                });
+            } catch (error) {
+                toast({ title: "Report Error", description: "Could not generate the report.", variant: "destructive" });
+            }
+        });
+    }
+
+    const renderSummaryWithCitations = (summary: string, sources: SourceDocument[]) => {
+        const parts = summary.split(/(\[\d+\])/g);
+        return parts.map((part, index) => {
+            const match = part.match(/\[(\d+)\]/);
+            if (match) {
+                const sourceIndex = parseInt(match[1], 10) - 1;
+                if (sources[sourceIndex]) {
+                    const source = sources[sourceIndex];
+                    return (
+                        <TooltipProvider key={index}>
+                            <ShadTooltip delayDuration={100}>
+                                <TooltipTrigger asChild>
+                                    <a href={source.url} target="_blank" rel="noopener noreferrer" className="text-primary font-bold hover:underline">
+                                        {part}
+                                    </a>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-md bg-card text-card-foreground border-accent">
+                                    <p className="font-bold">{source.title}</p>
+                                    <p className="italic mt-2">"{source.snippet}"</p>
+                                </TooltipContent>
+                            </ShadTooltip>
+                        </TooltipProvider>
+                    );
+                }
+            }
+            return part;
+        });
+    };
+
+    const fullSummaryText = `${data.introduction}\n\n${data.summary}\n\n${data.conclusion}`;
+    const keyMetricIcons: { [key: string]: React.ReactNode } = {
+        'sample': <Users className="h-5 w-5 text-muted-foreground" />,
+        'duration': <Calendar className="h-5 w-5 text-muted-foreground" />,
+        'radiation': <Radiation className="h-5 w-5 text-muted-foreground" />,
+    };
+
+    const getMetricIcon = (name: string) => {
+        const lowerName = name.toLowerCase();
+        if (lowerName.includes('sample')) return keyMetricIcons.sample;
+        if (lowerName.includes('duration')) return keyMetricIcons.duration;
+        if (lowerName.includes('radiation')) return keyMetricIcons.radiation;
+        return <TestTube className="h-5 w-5 text-muted-foreground" />;
+    }
+
   return (
-    <div className="space-y-8">
-      <Card className="shadow-lg">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-2xl">Technical Summary</CardTitle>
-          <a href={data.pdfUrl} download="report.pdf">
-            <Button variant="outline" size="sm">
-              <FileDown className="mr-2 h-4 w-4" />
-              Download Report (PDF)
-            </Button>
-          </a>
-        </CardHeader>
-        <CardContent>
-          <p className="text-base leading-relaxed whitespace-pre-wrap">{data.summary}</p>
-        </CardContent>
-      </Card>
+    <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex-grow space-y-6">
+            <SectionCard title="Technical Report" icon={<TestTube className="h-6 w-6" />} actions={
+                <div className="flex items-center gap-2">
+                    <AudioPlayer text={fullSummaryText} />
+                    <Button variant="default" size="sm" onClick={handleDownloadReport} disabled={isPdfLoading}>
+                        <FileDown className="mr-2 h-4 w-4" />
+                        {isPdfLoading ? "Generating..." : "Generate Report"}
+                    </Button>
+                </div>
+            }>
+                <div className="space-y-4 text-base leading-relaxed">
+                    <p><strong>Introduction:</strong> {data.introduction}</p>
+                    <p>{renderSummaryWithCitations(data.summary, data.sources)}</p>
+                    <div>
+                        <h4 className="font-bold text-lg mb-2">Methodology</h4>
+                        <p className="text-sm text-muted-foreground">{data.methodology}</p>
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-lg mb-2">Future Research</h4>
+                        <p className="text-sm text-muted-foreground">{data.futureResearch}</p>
+                    </div>
+                    <p><strong>Conclusion:</strong> {data.conclusion}</p>
+                </div>
+            </SectionCard>
 
-       <div className="grid md:grid-cols-3 gap-6">
-        {data.keyMetrics.map((metric) => (
-          <Card key={metric.name}>
-            <CardHeader className="pb-2">
-              <CardDescription>{metric.name}</CardDescription>
-              <CardTitle className="text-3xl">
-                {metric.value} <span className="text-sm font-normal text-muted-foreground">{metric.unit}</span>
-              </CardTitle>
-            </CardHeader>
-          </Card>
-        ))}
-      </div>
-      
-      <div className="grid md:grid-cols-2 gap-8">
-        <SectionCard title="Methodology" icon={<TestTube className="h-6 w-6" />}>
-            <p className="text-sm text-muted-foreground">{data.methodology}</p>
-        </SectionCard>
-         <SectionCard title="Future Research" icon={<ChevronsUp className="h-6 w-6" />}>
-            <p className="text-sm text-muted-foreground">{data.futureResearch}</p>
-        </SectionCard>
-      </div>
-
-      <SourceList sources={data.sources} />
-      
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl">
-            <BarChart className="h-6 w-6" />
-            Data Visualization
-          </CardTitle>
-          <CardDescription>{data.chartDescription}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-            <div className="aspect-video w-full rounded-lg border overflow-hidden">
-                 <Image src={data.chartImageUrl} alt="Data Visualization Chart" width={800} height={400} className="object-cover" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {data.keyMetrics.map((metric) => (
+                <Card key={metric.name}>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardDescription>{metric.name}</CardDescription>
+                        {getMetricIcon(metric.name)}
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-3xl font-bold">
+                            {metric.value} <span className="text-sm font-normal text-muted-foreground">{metric.unit}</span>
+                        </p>
+                    </CardContent>
+                </Card>
+                ))}
             </div>
-            <a href={data.chartImageUrl} download="chart.png">
-                <Button variant="outline" size="sm">
-                    <FileImage className="mr-2 h-4 w-4" />
-                    Download Chart (PNG)
-                </Button>
-            </a>
-        </CardContent>
-      </Card>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-xl">
-              <FileText className="h-6 w-6" />
-              Related Publications
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Authors</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.publications.map((pub) => (
-                  <TableRow key={pub.title}>
-                    <TableCell><a href={pub.url} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">{pub.title}</a></TableCell>
-                    <TableCell>{pub.authors.join(', ')}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-xl">
-              <Database className="h-6 w-6" />
-              Data Repositories
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Description</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.datasets.map((dataset) => (
-                   <TableRow key={dataset.name}>
-                    <TableCell><a href={dataset.url} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">{dataset.name}</a></TableCell>
-                    <TableCell>{dataset.description}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </div>
+            <SectionCard title="Data Visualization" icon={<BarChart className="h-6 w-6" />} description={data.chart.description}>
+                <div className="h-96 w-full">
+                    <ResponsiveContainer>
+                        <BarChart data={data.chart.data}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" label={{ value: data.chart.xAxisLabel, position: 'insideBottom', offset: -5 }} />
+                            <YAxis yAxisId="left" label={{ value: data.chart.yAxisLabel1, angle: -90, position: 'insideLeft' }} />
+                            <YAxis yAxisId="right" orientation="right" label={{ value: data.chart.yAxisLabel2, angle: -90, position: 'insideRight' }} />
+                            <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}/>
+                            <Legend />
+                            <Bar yAxisId="left" dataKey="value1" fill="hsl(var(--chart-1))" name={data.chart.yAxisLabel1} />
+                            <Bar yAxisId="right" dataKey="value2" fill="hsl(var(--chart-2))" name={data.chart.yAxisLabel2} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+            </SectionCard>
+        </div>
+        <ResearchNavigator navigator={data.researchNavigator} />
     </div>
   );
 }

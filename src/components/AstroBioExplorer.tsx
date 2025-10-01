@@ -3,51 +3,18 @@
 import { useState, useTransition, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Sparkles, Brain, ArrowRight } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast"
 
 import AppHeader from '@/components/Header';
 import ResultsDisplay from '@/components/ResultsDisplay';
 import type { DailyFeature, SearchResult } from '@/app/actions';
 import { getExperimentData, fetchDailyFeature } from '@/app/actions';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-
-function DailyFeatureCard({ 
-  feature, 
-  onDiveDeeper, 
-  mode 
-}: { 
-  feature: DailyFeature | null;
-  onDiveDeeper: (topic: string) => void;
-  mode: 'K-12' | 'Pro';
-}) {
-  if (!feature) return null;
-
-  const Icon = feature.title === 'Fun Fact of the Day' ? Sparkles : Brain;
-  const buttonText = mode === 'K-12' ? 'Learn more about it!' : 'Dive Deep';
-
-  return (
-    <Card className="my-8 bg-accent/10 border-accent/30 animate-in fade-in-50">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-accent">
-          <Icon className="h-6 w-6" />
-          {feature.title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-muted-foreground mb-4">{feature.content}</p>
-        <Button variant="ghost" className="text-accent hover:text-accent-foreground" onClick={() => onDiveDeeper(feature.content)}>
-          {buttonText}
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </CardContent>
-    </Card>
-  )
-}
 
 export default function AstroBioExplorer() {
   const [mode, setMode] = useState<'K-12' | 'Pro'>('K-12');
   const [query, setQuery] = useState('');
+  const [submittedQuery, setSubmittedQuery] = useState('');
   const [results, setResults] = useState<SearchResult | null>(null);
   const [dailyFeature, setDailyFeature] = useState<DailyFeature | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -55,6 +22,7 @@ export default function AstroBioExplorer() {
 
   useEffect(() => {
     async function loadDailyFeature() {
+      setDailyFeature(null);
       const feature = await fetchDailyFeature(mode);
       setDailyFeature(feature);
     }
@@ -70,6 +38,9 @@ export default function AstroBioExplorer() {
       })
       return;
     }
+    
+    setSubmittedQuery(currentQuery);
+    setResults(null);
 
     startTransition(async () => {
       try {
@@ -100,9 +71,17 @@ export default function AstroBioExplorer() {
     performSearch(topic);
   }
 
+  const handleModeChange = (newMode: 'K-12' | 'Pro') => {
+    setMode(newMode);
+    // If there's a result, re-fetch for the new mode
+    if (submittedQuery) {
+        performSearch(submittedQuery);
+    }
+  }
+
   return (
     <div className="flex flex-col w-full min-h-screen bg-background">
-      <AppHeader mode={mode} setMode={setMode} />
+      <AppHeader mode={mode} setMode={handleModeChange} />
       <main className="flex-grow container mx-auto px-4 py-8 md:py-12">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Explore NASA's Space Biology</h2>
@@ -136,6 +115,7 @@ export default function AstroBioExplorer() {
           dailyFeature={dailyFeature} 
           onDiveDeeper={handleDailyFeatureSearch}
           mode={mode}
+          query={submittedQuery}
         />
       </main>
       <footer className="py-4 text-center text-sm text-muted-foreground">

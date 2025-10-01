@@ -10,7 +10,7 @@ import { usePathname } from 'next/navigation';
 
 interface AppHeaderProps {
   mode: 'K-12' | 'Pro';
-  setMode: Dispatch<SetStateAction<'K-12' | 'Pro'>>;
+  setMode: (newMode: 'K-12' | 'Pro') => void;
 }
 
 export default function AppHeader({ mode, setMode }: AppHeaderProps) {

@@ -1,3 +1,5 @@
+'use client';
+
 import type { DailyFeature, SearchResult } from '@/app/actions';
 import K12Results from '@/components/K12Results';
 import ProResults from '@/components/ProResults';
@@ -12,6 +14,7 @@ interface ResultsDisplayProps {
   dailyFeature: DailyFeature | null;
   onDiveDeeper: (topic: string) => void;
   mode: 'K-12' | 'Pro';
+  query: string;
 }
 
 function DailyFeatureCard({ 
@@ -47,7 +50,7 @@ function DailyFeatureCard({
   )
 }
 
-export default function ResultsDisplay({ isLoading, results, dailyFeature, onDiveDeeper, mode }: ResultsDisplayProps) {
+export default function ResultsDisplay({ isLoading, results, dailyFeature, onDiveDeeper, mode, query }: ResultsDisplayProps) {
   if (isLoading) {
     return <ResultsSkeleton />;
   }
@@ -72,7 +75,7 @@ export default function ResultsDisplay({ isLoading, results, dailyFeature, onDiv
       {results.mode === 'K-12' ? (
         <K12Results data={results} />
       ) : (
-        <ProResults data={results} />
+        <ProResults data={results} query={query} />
       )}
     </div>
   );

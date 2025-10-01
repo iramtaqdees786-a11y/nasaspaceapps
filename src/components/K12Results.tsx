@@ -1,13 +1,14 @@
-import type { K12Result, Concept, GlossaryTerm } from '@/lib/types';
+'use client';
+
+import type { K12Result, Concept, GlossaryTerm } from '@/app/actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Download, Lightbulb, BrainCircuit, Dna, Thermometer, ClipboardCheck, FlaskConical, Pencil, BookOpen, Ear, Video, Play, Volume2, Beaker, CheckCircle, XCircle, BookText } from 'lucide-react';
-import { useState, useTransition, useMemo, useCallback } from 'react';
+import { useState, useTransition } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { getAudioSummary } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 interface K12ResultsProps {
   data: K12Result;
@@ -26,7 +27,7 @@ const iconMap: { [key: string]: React.ElementType } = {
 };
 
 function ConceptNode({ concept, isCentral = false, position }: { concept: Concept | { title: string }, isCentral?: boolean, position?: string }) {
-  const Icon = 'icon' in concept ? iconMap[concept.icon] : null;
+  const Icon = 'icon' in concept && concept.icon ? iconMap[concept.icon] : null;
   const cardClasses = `text-center shadow-lg transition-transform hover:scale-105 w-48 ${isCentral ? 'bg-primary text-primary-foreground' : 'bg-card'}`;
   
   const positions: { [key: string]: string } = {
@@ -35,7 +36,7 @@ function ConceptNode({ concept, isCentral = false, position }: { concept: Concep
       'left': "left-0 top-1/2 -translate-y-1/2 -translate-x-full",
       'right': "right-0 top-1/2 -translate-y-1/2 translate-x-full",
   };
-  const posClass = positions[position || 'top'];
+  const posClass = position ? positions[position] : 'top-0';
 
   return (
     <div className={`absolute ${posClass}`}>
@@ -56,13 +57,12 @@ function ConceptNode({ concept, isCentral = false, position }: { concept: Concep
   );
 }
 
-function LearningStrategy({ title, icon, children }: { title: string, icon: string, children: React.ReactNode }) {
-    const Icon = iconMap[icon];
+function LearningStrategy({ title, icon, children }: { title: string, icon: React.ReactNode, children: React.ReactNode }) {
     return (
-        <Card className="shadow-md">
+        <Card className="shadow-md h-full">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg text-accent">
-                    {Icon && <Icon className="h-5 w-5" />}
+                    {icon}
                     {title}
                 </CardTitle>
             </CardHeader>
@@ -81,8 +81,7 @@ function MatchTheConceptsQuiz({ quiz }: { quiz: K12Result['quiz'] }) {
     const [isFinished, setIsFinished] = useState(false);
 
     const handleConceptClick = (conceptId: string) => {
-        if (isFinished) return;
-        if (matches[conceptId]) return;
+        if (isFinished || matches[conceptId]) return;
         setSelectedConcept(conceptId);
     };
 
@@ -100,7 +99,7 @@ function MatchTheConceptsQuiz({ quiz }: { quiz: K12Result['quiz'] }) {
             newResults[pair.conceptId] = matches[pair.conceptId] === pair.definitionId;
         });
         setResults(newResults);
-        setIsFinished(true);
+setIsFinished(true);
     };
 
     const resetQuiz = () => {
@@ -120,8 +119,7 @@ function MatchTheConceptsQuiz({ quiz }: { quiz: K12Result['quiz'] }) {
                 <CardTitle>{quiz.title}</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="grid grid-cols-2 gap-4 md:gap-8">
-                    {/* Concepts Column */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
                     <div className="flex flex-col gap-2">
                         {quiz.concepts.map(concept => (
                             <Button
@@ -139,7 +137,6 @@ function MatchTheConceptsQuiz({ quiz }: { quiz: K12Result['quiz'] }) {
                             </Button>
                         ))}
                     </div>
-                    {/* Definitions Column */}
                     <div className="flex flex-col gap-2">
                          {shuffledDefs.map(def => (
                             <Button
@@ -183,10 +180,10 @@ function Glossary({ terms }: { terms: GlossaryTerm[] }) {
                 <CardDescription>Key terms from the summary.</CardDescription>
             </CardHeader>
             <CardContent>
-                <ul className="space-y-2">
+                <ul className="space-y-3">
                     {terms.map(term => (
-                        <li key={term.term} className="text-sm">
-                           <span className="font-bold text-foreground">{term.term}:</span> {term.definition}
+                        <li key={term.term} className="text-sm border-l-4 border-accent/50 pl-3">
+                           <strong className="font-bold text-foreground">{term.term}:</strong> {term.definition}
                         </li>
                     ))}
                 </ul>
@@ -195,10 +192,18 @@ function Glossary({ terms }: { terms: GlossaryTerm[] }) {
     )
 }
 
+const learningStyleIcons: { [key: string]: React.ReactNode } = {
+  Visual: <Video className="h-5 w-5" />,
+  Auditory: <Ear className="h-5 w-5" />,
+  'Reading/Writing': <Pencil className="h-5 w-5" />,
+  Kinesthetic: <Dna className="h-5 w-5" />,
+};
+
 export default function K12Results({ data }: K12ResultsProps) {
     const [audioSrc, setAudioSrc] = useState<string | null>(null);
     const [isAudioLoading, startAudioTransition] = useTransition();
     const { toast } = useToast();
+    const fullSummary = `${data.introduction}\n\n${data.summary}\n\n${data.conclusion}`;
 
     const handlePlayAudio = () => {
         if (audioSrc) {
@@ -209,7 +214,7 @@ export default function K12Results({ data }: K12ResultsProps) {
 
         startAudioTransition(async () => {
             try {
-                const result = await getAudioSummary(data.summary);
+                const result = await getAudioSummary(fullSummary);
                 setAudioSrc(result.media);
                 const audio = new Audio(result.media);
                 audio.play();
@@ -229,7 +234,7 @@ export default function K12Results({ data }: K12ResultsProps) {
     <div className="space-y-8">
       <Card className="shadow-lg overflow-hidden">
         <CardHeader className="flex flex-row items-center justify-between bg-muted/30">
-          <CardTitle className="text-2xl">Experiment Summary</CardTitle>
+          <CardTitle className="text-2xl">Experiment Overview</CardTitle>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handlePlayAudio} disabled={isAudioLoading}>
                 {isAudioLoading ? 'Loading...' : (audioSrc ? <Volume2 className="mr-2 h-4 w-4"/> : <Play className="mr-2 h-4 w-4" />)}
@@ -241,8 +246,10 @@ export default function K12Results({ data }: K12ResultsProps) {
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="pt-6">
-          <p className="text-base leading-relaxed">{data.summary}</p>
+        <CardContent className="pt-6 space-y-4 text-base leading-relaxed">
+            <p><strong className="font-semibold text-primary">Introduction:</strong> {data.introduction}</p>
+            <p>{data.summary}</p>
+            <p><strong className="font-semibold text-primary">Conclusion:</strong> {data.conclusion}</p>
         </CardContent>
       </Card>
 
@@ -274,63 +281,50 @@ export default function K12Results({ data }: K12ResultsProps) {
        <Glossary terms={data.glossary} />
 
       <div>
-        <h3 className="text-2xl font-bold text-center mb-6">Learning Strategies</h3>
+        <h3 className="text-2xl font-bold text-center mb-6">Interactive Learning Center</h3>
         <Accordion type="single" collapsible className="w-full" defaultValue="item-1">
             <AccordionItem value="item-1">
-                <AccordionTrigger>
-                    <CardTitle className="flex items-center gap-2 text-xl">
-                        <Pencil className="h-6 w-6" />
-                        Interactive Quiz
-                    </CardTitle>
+                <AccordionTrigger className="text-xl font-semibold">
+                    <Pencil className="mr-2 h-6 w-6" />
+                    Interactive Quiz
                 </AccordionTrigger>
                 <AccordionContent>
                     <MatchTheConceptsQuiz quiz={data.quiz} />
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
-                <AccordionTrigger>
-                    <CardTitle className="flex items-center gap-2 text-xl">
-                        <BookOpen className="h-6 w-6" />
-                        Learning Styles
-                    </CardTitle>
+                <AccordionTrigger className="text-xl font-semibold">
+                    <BookOpen className="mr-2 h-6 w-6" />
+                    Personalized Learning Styles
                 </AccordionTrigger>
                 <AccordionContent>
                      <div className="grid md:grid-cols-2 gap-4">
-                        <LearningStrategy title="Visual" icon="video">
-                            <p>Try drawing diagrams of the experiment setup or findings.</p>
-                        </LearningStrategy>
-                        <LearningStrategy title="Auditory" icon="ear">
-                            <p>Read the summary aloud or discuss it with a friend.</p>
-                        </LearningStrategy>
-                        <LearningStrategy title="Reading/Writing" icon="pencil">
-                            <p>Write your own summary or create flashcards for key terms.</p>
-                        </LearningStrategy>
-                        <LearningStrategy title="Kinesthetic" icon="dna">
-                            <p>Build a simple model of the experiment if possible.</p>
-                        </LearningStrategy>
+                        {data.learningStyles.map(ls => (
+                            <LearningStrategy key={ls.style} title={ls.style} icon={learningStyleIcons[ls.style]}>
+                                <p>{ls.suggestion}</p>
+                            </LearningStrategy>
+                        ))}
                     </div>
                 </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
-                <AccordionTrigger>
-                    <CardTitle className="flex items-center gap-2 text-xl">
-                        <Beaker className="h-6 w-6" />
-                        Activities
-                    </CardTitle>
+                <AccordionTrigger className="text-xl font-semibold">
+                    <Beaker className="mr-2 h-6 w-6" />
+                    Hands-On Activities
                 </AccordionTrigger>
                 <AccordionContent>
-                    <Card>
-                        <CardContent className="pt-6 grid gap-4">
-                            <div className="p-4 border rounded-lg">
-                                <h4 className="font-bold">Home Experiment</h4>
-                                <p>Try growing a bean seed in a plastic bag with a wet paper towel. Place one in a dark closet and one near a window. Compare them after a week. How is this like growing plants in space vs. on Earth?</p>
-                            </div>
-                            <div className="p-4 border rounded-lg">
-                                <h4 className="font-bold">Creative Writing</h4>
-                                <p>Write a short story from the perspective of a plant traveling to space for the first time. What does it see? How does it feel different?</p>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <div className="grid md:grid-cols-2 gap-6">
+                        {data.activities.map(activity => (
+                             <Card key={activity.title}>
+                                <CardHeader>
+                                    <CardTitle>{activity.title}</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p>{activity.description}</p>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
                 </AccordionContent>
             </AccordionItem>
         </Accordion>
