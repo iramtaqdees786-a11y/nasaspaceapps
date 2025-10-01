@@ -3,6 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { BarChart, Download, FileText, Database, Milestone, FileImage, FileDown, TestTube, ChevronsUp, MessageSquareQuote } from 'lucide-react';
 import Image from 'next/image';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table';
 
 interface ProResultsProps {
   data: ProResult;
