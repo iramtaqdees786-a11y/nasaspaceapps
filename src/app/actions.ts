@@ -7,6 +7,7 @@ import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { getDailyFeature } from '@/ai/flows/get-daily-feature';
 import type { K12Result as K12ContentType } from '@/ai/flows/generate-k12-content';
 import type { ProResult as ProContentType } from '@/ai/flows/generate-pro-content';
+import type { AudioResult as AudioResultType } from '@/lib/types';
 
 
 // Re-defining schemas here to avoid client-side import of server code.
@@ -55,9 +56,7 @@ export type ProResult = ProContentType & { mode: 'Pro' };
 
 export type SearchResult = K12Result | ProResult;
 
-export type AudioResult = {
-  media: string;
-};
+export type AudioResult = AudioResultType;
 
 export type DailyFeature = {
     title: string;

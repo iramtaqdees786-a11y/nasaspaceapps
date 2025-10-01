@@ -1,10 +1,10 @@
 'use client';
 
-import type { ProResult, SourceDocument, Publication, DataSet, SearchResult } from '@/app/actions';
+import type { ProResult, SourceDocument } from '@/app/actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BarChart2, BookCopy, Database, FileDown, TestTube, ChevronsUp, MessageSquareQuote, Play, Volume2, Pause, Users, Calendar, Radiation } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, TooltipProps } from 'recharts';
+import { AreaChart, BarChart2, BookCopy, Database, FileDown, TestTube, ChevronsUp, MessageSquareQuote, Play, Volume2, Pause, Users, Calendar, Radiation, LineChart } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, TooltipProps } from 'recharts';
 import { useState, useTransition, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getAudioSummary, getPdfReportContent } from '@/app/actions';
@@ -239,22 +239,39 @@ export default function ProResults({ data, query }: ProResultsProps) {
                 ))}
             </div>
 
-            <SectionCard title="Data Visualization" icon={<BarChart2 className="h-6 w-6" />} description={data.chart.description}>
-                <div className="h-96 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={data.chart.data}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" label={{ value: data.chart.xAxisLabel, position: 'insideBottom', offset: -5 }} />
-                            <YAxis yAxisId="left" label={{ value: data.chart.yAxisLabel1, angle: -90, position: 'insideLeft' }} />
-                            <YAxis yAxisId="right" orientation="right" label={{ value: data.chart.yAxisLabel2, angle: -90, position: 'insideRight' }} />
-                            <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}/>
-                            <Legend />
-                            <Bar yAxisId="left" dataKey="value1" fill="hsl(var(--chart-1))" name={data.chart.yAxisLabel1} />
-                            <Bar yAxisId="right" dataKey="value2" fill="hsl(var(--chart-2))" name={data.chart.yAxisLabel2} />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
-            </SectionCard>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <SectionCard title="Data Visualization 1" icon={<BarChart2 className="h-6 w-6" />} description={data.barChart.description}>
+                    <div className="h-80 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={data.barChart.data}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} label={{ value: data.barChart.xAxisLabel, position: 'insideBottom', offset: -5 }} />
+                                <YAxis fontSize={12} tickLine={false} axisLine={false} yAxisId="left" orientation="left" stroke="#888888" label={{ value: data.barChart.yAxisLabel1, angle: -90, position: 'insideLeft' }} />
+                                <YAxis fontSize={12} tickLine={false} axisLine={false} yAxisId="right" orientation="right" stroke="#82ca9d" label={{ value: data.barChart.yAxisLabel2, angle: -90, position: 'insideRight' }} />
+                                <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}/>
+                                <Legend />
+                                <Bar yAxisId="left" dataKey="value1" fill="hsl(var(--chart-1))" name={data.barChart.yAxisLabel1} />
+                                <Bar yAxisId="right" dataKey="value2" fill="hsl(var(--chart-2))" name={data.barChart.yAxisLabel2} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </SectionCard>
+                 <SectionCard title="Data Visualization 2" icon={<LineChart className="h-6 w-6" />} description={data.areaChart.description}>
+                    <div className="h-80 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={data.areaChart.data}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} label={{ value: data.areaChart.xAxisLabel, position: 'insideBottom', offset: -5 }} />
+                                <YAxis fontSize={12} tickLine={false} axisLine={false} />
+                                <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}/>
+                                <Legend />
+                                <Area type="monotone" dataKey="value1" stackId="1" stroke="hsl(var(--chart-3))" fill="hsl(var(--chart-3))" name={data.areaChart.yAxisLabel1} />
+                                <Area type="monotone" dataKey="value2" stackId="1" stroke="hsl(var(--chart-4))" fill="hsl(var(--chart-4))" name={data.areaChart.yAxisLabel2} />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                </SectionCard>
+            </div>
         </div>
         <ResearchNavigator navigator={data.researchNavigator} />
     </div>
