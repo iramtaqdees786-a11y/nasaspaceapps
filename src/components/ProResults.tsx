@@ -239,7 +239,7 @@ export default function ProResults({ data, query }: ProResultsProps) {
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-6">
                 <SectionCard title="Data Visualization 1" icon={<BarChart2 className="h-6 w-6" />} description={data.barChart.description}>
                     <div className="h-80 w-full">
                         <ResponsiveContainer width="100%" height="100%">
