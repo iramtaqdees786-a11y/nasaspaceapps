@@ -22,7 +22,7 @@ const prompt = ai.definePrompt({
   output: { schema: ProOutputSchema },
   prompt: `You are an AI expert in scientific research analysis, specializing in space biology. Your task is to analyze the provided research document and create a comprehensive and technical summary suitable for university students and researchers.
 
-You MUST derive all information directly from the provided document. Do not use external knowledge unless it is to find real URLs for citations if they are mentioned but not linked.
+You MUST derive all information directly from the provided document. Do not use external knowledge.
 
 Document: {{{fileName}}}
 {{media url=fileDataUri}}
@@ -30,10 +30,9 @@ Document: {{{fileName}}}
 **Instructions**:
 *   Analyze the document and generate a full, structured output according to the schema.
 *   The 'introduction', 'summary', 'methodology', 'futureResearch', and 'conclusion' sections must be derived entirely from the document's content.
-*   Identify key sentences or findings and list them as 'sources' with snippets. If the document has a title, use it. For the URL, use a placeholder or find a real one if a DOI is provided.
+*   Identify key sentences or findings and list them as 'sources' with snippets. If the document has a title, use it. For the URL, use a placeholder.
 *   Extract or generate plausible 'keyMetrics' from the document's data.
 *   Generate two distinct and plausible charts ('barChart', 'areaChart') based on data or trends described in the document.
-*   Based on the document's content, populate the 'researchNavigator' with plausible (but not necessarily real unless mentioned) related studies, data repositories, and key publications.
 
 Please generate the full output object according to the specified schema.`,
 });

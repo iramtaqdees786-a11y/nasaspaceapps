@@ -3,7 +3,7 @@
 import type { ProResult, SourceDocument } from '@/app/actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { LineChart as LineChartIcon, BarChart2, BookCopy, Database, FileDown, TestTube, ChevronsUp, MessageSquareQuote, Play, Volume2, Pause, Users, Calendar, Radiation } from 'lucide-react';
+import { LineChart as LineChartIcon, BarChart2, FileDown, TestTube, ChevronsUp, MessageSquareQuote, Play, Volume2, Pause, Users, Calendar, Radiation } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { useState, useTransition, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -80,43 +80,6 @@ function AudioPlayer({ text }: { text: string }) {
             {isLoading ? 'Generating...' : (isPlaying ? 'Pause' : 'Listen')}
         </Button>
     );
-}
-
-function ResearchNavigator({ navigator }: { navigator: ProResult['researchNavigator'] }) {
-    return (
-        <div className="w-full md:w-80 lg:w-96 flex-shrink-0 space-y-6">
-             <SectionCard title="Related Studies" icon={<BookCopy className="h-5 w-5" />} description="From NASA Task Book">
-                <ul className="space-y-3 text-sm">
-                    {navigator.relatedStudies.map((study, i) => (
-                        <li key={i} className="group">
-                           <a href={study.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary group-hover:underline">{study.title}</a>
-                           <p className="text-xs text-muted-foreground">Authors: {study.authors.join(', ')}</p>
-                        </li>
-                    ))}
-                </ul>
-            </SectionCard>
-            <SectionCard title="Data Repositories" icon={<Database className="h-5 w-5" />} >
-                <ul className="space-y-3 text-sm">
-                    {navigator.dataRepositories.map((repo, i) => (
-                        <li key={i} className="group">
-                           <a href={repo.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary group-hover:underline">{repo.name}</a>
-                           <p className="text-xs text-muted-foreground">{repo.description}</p>
-                        </li>
-                    ))}
-                </ul>
-            </SectionCard>
-            <SectionCard title="Key Publications" icon={<MessageSquareQuote className="h-5 w-5" />} >
-                <ul className="space-y-3 text-sm">
-                    {navigator.keyPublications.map((pub, i) => (
-                        <li key={i} className="group">
-                           <a href={pub.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary group-hover:underline">{pub.title}</a>
-                           <p className="text-xs text-muted-foreground">Authors: {pub.authors.join(', ')}</p>
-                        </li>
-                    ))}
-                </ul>
-            </SectionCard>
-        </div>
-    )
 }
 
 export default function ProResults({ data, query }: ProResultsProps) {
@@ -273,7 +236,6 @@ export default function ProResults({ data, query }: ProResultsProps) {
                 </SectionCard>
             </div>
         </div>
-        <ResearchNavigator navigator={data.researchNavigator} />
     </div>
   );
 }

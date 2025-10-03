@@ -23,7 +23,7 @@ const prompt = ai.definePrompt({
   output: { schema: ProOutputSchema },
   prompt: `You are an AI expert in NASA space biology, tasked with creating a comprehensive and technical educational experience for university students and researchers. Based on the user's query, you will generate a structured set of content.
 
-You MUST use real-time, verifiable data from NASA's official sources (like NASA.gov, GeneLab, Task Book) and reputable scientific journals. All URLs must be real and lead to the correct documents.
+You MUST use real-time, verifiable data from NASA's official sources (like NASA.gov, GeneLab, Task Book) and reputable scientific journals.
 
 User Query: {{{query}}}
 
@@ -32,7 +32,6 @@ User Query: {{{query}}}
 *   The 'summary' text MUST include inline citations (e.g., "[1]", "[2]") that correspond to the 'sources' array. The 0-indexed position in the array maps to the citation number (e.g., sources[0] is citation "[1]").
 *   The 'sources' array must contain at least 3 real, verifiable source documents with direct quotes as snippets.
 *   The chart data (for both 'barChart' and 'areaChart') should be realistic and plausible for the given experiment. Generate distinct data and labels for each chart.
-*   The 'researchNavigator' content must be populated with real, relevant studies and datasets from official sources. All URLs must be valid and verifiable.
 
 Please generate the full output object according to the specified schema.`,
 });
