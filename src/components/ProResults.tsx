@@ -3,8 +3,8 @@
 import type { ProResult, SourceDocument } from '@/app/actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AreaChart, BarChart2, BookCopy, Database, FileDown, TestTube, ChevronsUp, MessageSquareQuote, Play, Volume2, Pause, Users, Calendar, Radiation, LineChart } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, TooltipProps } from 'recharts';
+import { LineChart as LineChartIcon, BarChart2, BookCopy, Database, FileDown, TestTube, ChevronsUp, MessageSquareQuote, Play, Volume2, Pause, Users, Calendar, Radiation } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { useState, useTransition, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getAudioSummary, getPdfReportContent } from '@/app/actions';
@@ -256,7 +256,7 @@ export default function ProResults({ data, query }: ProResultsProps) {
                         </ResponsiveContainer>
                     </div>
                 </SectionCard>
-                 <SectionCard title="Data Visualization 2" icon={<LineChart className="h-6 w-6" />} description={data.areaChart.description}>
+                 <SectionCard title="Data Visualization 2" icon={<LineChartIcon className="h-6 w-6" />} description={data.areaChart.description}>
                     <div className="h-80 w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={data.areaChart.data}>
