@@ -6,6 +6,7 @@ import Logo from '@/components/Logo';
 import { GraduationCap, Briefcase } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Button } from './ui/button';
 
 
 interface AppHeaderProps {
@@ -25,7 +26,17 @@ export default function AppHeader({ mode, setMode }: AppHeaderProps) {
             AstroBio Explorer
           </h1>
         </Link>
-        {pathname === '/explorer' && (
+        
+        <nav className="hidden md:flex items-center gap-2">
+            <Button asChild variant={pathname === '/explorer' ? 'secondary' : 'ghost'}>
+                <Link href="/explorer">Explorer</Link>
+            </Button>
+            <Button asChild variant={pathname === '/experimenters' ? 'secondary' : 'ghost'}>
+                <Link href="/experimenters">Experimenters</Link>
+            </Button>
+        </nav>
+
+        {pathname === '/explorer' ? (
           <ToggleGroup 
             type="single" 
             value={mode} 
@@ -43,7 +54,7 @@ export default function AppHeader({ mode, setMode }: AppHeaderProps) {
               Pro
             </ToggleGroupItem>
           </ToggleGroup>
-        )}
+        ) : <div className='w-44'/>}
       </div>
     </header>
   );

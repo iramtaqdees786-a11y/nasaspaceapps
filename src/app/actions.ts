@@ -5,6 +5,7 @@ import { generateProContent } from '@/ai/flows/generate-pro-content';
 import { generatePdfReport } from '@/ai/flows/generate-pdf-report';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { getDailyFeature } from '@/ai/flows/get-daily-feature';
+import { analyzeDocument as analyzeDocumentFlow } from '@/ai/flows/analyze-document-flow';
 import type { K12Result as K12ContentType } from '@/ai/flows/generate-k12-content';
 import type { ProResult as ProContentType } from '@/ai/flows/generate-pro-content';
 import type { AudioResult as AudioResultType } from '@/lib/types';
@@ -120,4 +121,18 @@ export async function getPdfReportContent(query: string): Promise<any> {
         console.error('Error generating PDF report content:', error);
         throw new Error('Failed to generate report content.');
     }
+}
+
+export async function analyzeDocument(fileDataUri: string, fileName: string): Promise<ProResult> {
+  if (!fileDataUri) {
+    throw new Error('No file provided for analysis.');
+  }
+
+  try {
+    const result = await analyzeDocumentFlow({ fileDataUri, fileName });
+    return { ...result, mode: 'Pro' };
+  } catch (error) {
+    console.error('Error analyzing document:', error);
+    throw new Error('Failed to analyze document with AI. Please try again.');
+  }
 }

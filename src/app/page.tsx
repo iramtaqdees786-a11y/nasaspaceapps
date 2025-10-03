@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Rocket, Telescope, Dna } from 'lucide-react';
+import { Rocket, Telescope, Dna, FileCheck } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
@@ -13,9 +13,17 @@ export default function Home() {
               AstroBio Explorer
             </h1>
           </div>
-          <Button asChild>
-            <Link href="/explorer">Launch Explorer</Link>
-          </Button>
+          <nav className="flex items-center gap-4">
+            <Button asChild variant="ghost">
+                <Link href="/explorer">Explorer</Link>
+            </Button>
+            <Button asChild variant="ghost">
+                <Link href="/experimenters">Experimenters</Link>
+            </Button>
+            <Button asChild>
+                <Link href="/explorer">Launch App</Link>
+            </Button>
+          </nav>
         </div>
       </header>
 
@@ -38,7 +46,7 @@ export default function Home() {
 
       <section className="bg-muted/50 py-16">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-12 text-center">
+          <div className="grid md:grid-cols-4 gap-12 text-center">
             <div className="flex flex-col items-center">
               <Telescope className="h-12 w-12 text-accent mb-4" />
               <h3 className="text-2xl font-bold mb-2">For Researchers</h3>
@@ -59,6 +67,13 @@ export default function Home() {
               <p className="text-muted-foreground">
                 Leverages generative AI to synthesize and present information in a tailored format.
               </p>
+            </div>
+            <div className="flex flex-col items-center">
+                <FileCheck className="h-12 w-12 text-accent mb-4" />
+                <h3 className="text-2xl font-bold mb-2">Analyze Documents</h3>
+                <p className="text-muted-foreground">
+                    Upload your own research papers and get an AI-powered breakdown and analysis.
+                </p>
             </div>
           </div>
         </div>
