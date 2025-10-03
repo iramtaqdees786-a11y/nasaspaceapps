@@ -20,7 +20,7 @@ export default function AppHeader({ mode, setMode }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card/80 backdrop-blur-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-3" prefetch={false}>
           <Logo className="h-8 w-8 text-primary" />
           <h1 className="text-xl font-bold tracking-tight text-foreground">
             AstroBio Explorer
@@ -29,10 +29,10 @@ export default function AppHeader({ mode, setMode }: AppHeaderProps) {
         
         <nav className="hidden md:flex items-center gap-2">
             <Button asChild variant={pathname === '/explorer' ? 'secondary' : 'ghost'}>
-                <Link href="/explorer">Explorer</Link>
+                <Link href="/explorer" prefetch={false}>Explorer</Link>
             </Button>
             <Button asChild variant={pathname === '/experimenters' ? 'secondary' : 'ghost'}>
-                <Link href="/experimenters">Experimenters</Link>
+                <Link href="/experimenters" prefetch={false}>Experimenters</Link>
             </Button>
         </nav>
 
