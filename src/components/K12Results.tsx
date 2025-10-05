@@ -3,13 +3,14 @@
 import type { K12Result, Concept } from '@/app/actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Lightbulb, BrainCircuit, Dna, Thermometer, ClipboardCheck, FlaskConical, Pencil, BookOpen, Ear, Video, Play, Volume2, Beaker, CheckCircle, XCircle, BookText, Rocket, Atom, Telescope, Sprout, ExternalLink } from 'lucide-react';
-import { useState, useTransition, useEffect } from 'react';
+import { Lightbulb, BrainCircuit, Dna, Thermometer, ClipboardCheck, FlaskConical, Pencil, BookOpen, Ear, Video, Play, Volume2, Beaker, CheckCircle, XCircle, BookText, Rocket, Atom, Telescope, Sprout, ExternalLink, Pause } from 'lucide-react';
+import { useState, useTransition, useEffect, useRef } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { getAudioSummary } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import Image from 'next/image';
 
 
 interface K12ResultsProps {
@@ -241,27 +242,37 @@ const learningStyleIcons: { [key: string]: React.ReactNode } = {
   Kinesthetic: <Dna className="h-5 w-5" />,
 };
 
-export default function K12Results({ data }: K12ResultsProps) {
+function AudioPlayer({ text }: { text: string }) {
     const [audioSrc, setAudioSrc] = useState<string | null>(null);
-    const [isAudioLoading, startAudioTransition] = useTransition();
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isLoading, startTransition] = useTransition();
+    const audioRef = useRef<HTMLAudioElement | null>(null);
     const { toast } = useToast();
-    const fullSummary = `${data.introduction}\n\n${data.summary}\n\n${data.conclusion}`;
 
-    const handlePlayAudio = () => {
-        if (audioSrc) {
-            const audio = new Audio(audioSrc);
-            audio.play();
+    const handlePlayPause = async () => {
+        if (isPlaying) {
+            audioRef.current?.pause();
+            setIsPlaying(false);
             return;
         }
 
-        startAudioTransition(async () => {
+        if (audioSrc) {
+            audioRef.current?.play();
+            setIsPlaying(true);
+            return;
+        }
+
+        startTransition(async () => {
             try {
-                const result = await getAudioSummary(fullSummary);
+                const result = await getAudioSummary(text);
                 setAudioSrc(result.media);
                 const audio = new Audio(result.media);
+                audioRef.current = audio;
                 audio.play();
+                audio.onended = () => setIsPlaying(false);
+                setIsPlaying(true);
             } catch (error) {
-                 toast({
+                toast({
                     title: "Audio Error",
                     description: "Could not generate audio for the summary.",
                     variant: "destructive",
@@ -269,6 +280,29 @@ export default function K12Results({ data }: K12ResultsProps) {
             }
         });
     };
+    
+    let Icon, buttonText;
+    if (isLoading) {
+        Icon = Volume2;
+        buttonText = 'Generating...';
+    } else if (isPlaying) {
+        Icon = Pause;
+        buttonText = 'Pause';
+    } else {
+        Icon = Play;
+        buttonText = 'Listen';
+    }
+    
+    return (
+        <Button variant="outline" size="sm" onClick={handlePlayPause} disabled={isLoading}>
+            <Icon className="mr-2 h-4 w-4" />
+            {buttonText}
+        </Button>
+    );
+}
+
+export default function K12Results({ data }: K12ResultsProps) {
+    const fullSummary = `${data.introduction}\n\n${data.summary}\n\n${data.conclusion}`;
     
     const getHexPosition = (index: number, radius: number, total: number): React.CSSProperties => {
         const angle = (Math.PI / 3) * index;
@@ -283,21 +317,27 @@ export default function K12Results({ data }: K12ResultsProps) {
 
   return (
     <div className="space-y-8">
-      <Card className="shadow-lg overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between bg-muted/30">
-          <CardTitle className="text-2xl">Experiment Overview</CardTitle>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handlePlayAudio} disabled={isAudioLoading}>
-                {isAudioLoading ? 'Loading...' : (audioSrc ? <Volume2 className="mr-2 h-4 w-4"/> : <Play className="mr-2 h-4 w-4" />)}
-                Listen
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-6 space-y-4 text-base leading-relaxed">
-            <p><strong className="font-semibold text-primary">Introduction:</strong> {data.introduction}</p>
-            <p>{data.summary}</p>
-            <p><strong className="font-semibold text-primary">Conclusion:</strong> {data.conclusion}</p>
-        </CardContent>
+        <Card className="shadow-lg overflow-hidden">
+            <div className="relative w-full h-64 md:h-80">
+                <Image
+                    src={data.imageUrl}
+                    alt={data.conceptMap.centralTopic}
+                    fill
+                    className="object-cover"
+                />
+                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+            </div>
+            <div className="relative p-6">
+                <CardHeader className="p-0 mb-4 flex flex-row items-center justify-between">
+                    <CardTitle className="text-2xl">Experiment Overview</CardTitle>
+                    <AudioPlayer text={fullSummary} />
+                </CardHeader>
+                <CardContent className="p-0 pt-2 space-y-4 text-base leading-relaxed">
+                    <p><strong className="font-semibold text-primary">Introduction:</strong> {data.introduction}</p>
+                    <p>{data.summary}</p>
+                    <p><strong className="font-semibold text-primary">Conclusion:</strong> {data.conclusion}</p>
+                </CardContent>
+            </div>
       </Card>
 
       <div className="grid md:grid-cols-2 gap-8">

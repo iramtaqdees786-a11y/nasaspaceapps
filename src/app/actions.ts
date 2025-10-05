@@ -2,7 +2,6 @@
 
 import { generateK12Content } from '@/ai/flows/generate-k12-content';
 import { generateProContent } from '@/ai/flows/generate-pro-content';
-import { generatePdfReport } from '@/ai/flows/generate-pdf-report';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { getDailyFeature } from '@/ai/flows/get-daily-feature';
 import { analyzeDocument as analyzeDocumentFlow } from '@/ai/flows/analyze-document-flow';
@@ -107,19 +106,6 @@ export async function fetchDailyFeature(mode: 'K-12' | 'Pro'): Promise<DailyFeat
             title: 'Content not available',
             content: 'Could not load the daily feature. Please try again later.'
         };
-    }
-}
-
-export async function getPdfReportContent(query: string): Promise<any> {
-    if (!query) {
-        throw new Error('Query cannot be empty.');
-    }
-    try {
-        const reportContent = await generatePdfReport({ query });
-        return reportContent;
-    } catch (error) {
-        console.error('Error generating PDF report content:', error);
-        throw new Error('Failed to generate report content.');
     }
 }
 

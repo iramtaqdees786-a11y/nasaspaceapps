@@ -57,6 +57,7 @@ const K12OutputSchema = z.object({
   introduction: z.string().describe('A brief, engaging introduction to the topic for a K-12 audience.'),
   summary: z.string().describe('The main summary of the experiment, written in simple, accessible language.'),
   conclusion: z.string().describe('A short concluding paragraph.'),
+  imageUrl: z.string().url().describe('A relevant, high-quality image URL from a NASA source (e.g., images.nasa.gov or a similar official repository).'),
   analogy: z.string().describe('A fun and memorable analogy to help students understand the experiment.'),
   memoryTrick: z.string().describe('A memory trick or mnemonic device to help students remember a key concept.'),
   glossary: z.array(GlossaryTermSchema).length(5).describe('A list of exactly 5 key terms and their simple definitions.'),
@@ -88,6 +89,7 @@ You MUST use real-time, verifiable data from NASA's official sources (like NASA.
 User Query: {{{query}}}
 
 **Instructions**:
+*   Find a single, compelling, high-quality image from a NASA source (like images.nasa.gov or nasa.gov/multimedia/) that is directly relevant to the user's query and add it to the 'imageUrl' field.
 *   Generate all content to be engaging, simple, and suitable for a K-12 audience.
 *   The 'glossary', 'conceptMap', 'quiz', 'learningStyles', 'activities', and 'sources' must be directly and creatively related to the user's query.
 *   Ensure the concept map has exactly 6 related concepts.

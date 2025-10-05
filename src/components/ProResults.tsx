@@ -3,11 +3,11 @@
 import type { ProResult, SourceDocument } from '@/app/actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { LineChart as LineChartIcon, BarChart2, FileDown, TestTube, ChevronsUp, MessageSquareQuote, Play, Volume2, Pause, Users, Calendar, Radiation } from 'lucide-react';
+import { LineChart as LineChartIcon, BarChart2, TestTube, ChevronsUp, MessageSquareQuote, Play, Volume2, Pause, Users, Calendar, Radiation } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { useState, useTransition, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { getAudioSummary, getPdfReportContent } from '@/app/actions';
+import { getAudioSummary } from '@/app/actions';
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ProResultsProps {
@@ -73,47 +73,29 @@ function AudioPlayer({ text }: { text: string }) {
             }
         });
     };
-    const Icon = isPlaying ? Pause : Play;
+    
+    let Icon, buttonText;
+    if (isLoading) {
+        Icon = Volume2;
+        buttonText = 'Generating...';
+    } else if (isPlaying) {
+        Icon = Pause;
+        buttonText = 'Pause';
+    } else {
+        Icon = Play;
+        buttonText = 'Listen';
+    }
+
     return (
         <Button variant="outline" size="sm" onClick={handlePlayPause} disabled={isLoading}>
             <Icon className="mr-2 h-4 w-4" />
-            {isLoading ? 'Generating...' : (isPlaying ? 'Pause' : 'Listen')}
+            {buttonText}
         </Button>
     );
 }
 
 export default function ProResults({ data, query }: ProResultsProps) {
     const { toast } = useToast();
-    const [isPdfLoading, startPdfTransition] = useTransition();
-
-    const handleDownloadReport = () => {
-        startPdfTransition(async () => {
-            toast({
-                title: "Generating Report",
-                description: "This may take a minute. The download will start automatically."
-            })
-            try {
-                const reportContent = await getPdfReportContent(query);
-                // In a real app, you'd convert this JSON to a PDF.
-                // For now, we'll download the JSON content.
-                const blob = new Blob([JSON.stringify(reportContent, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${query.replace(/\s+/g, '_')}_report.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                 toast({
-                    title: "Report Content Generated",
-                    description: "Report data has been downloaded as a JSON file.",
-                });
-            } catch (error) {
-                toast({ title: "Report Error", description: "Could not generate the report.", variant: "destructive" });
-            }
-        });
-    }
 
     const renderSummaryWithCitations = (summary: string, sources: SourceDocument[]) => {
         const parts = summary.split(/(\[\d+\])/g);
@@ -165,10 +147,6 @@ export default function ProResults({ data, query }: ProResultsProps) {
             <SectionCard title="Technical Report" icon={<TestTube className="h-6 w-6" />} actions={
                 <div className="flex items-center gap-2">
                     <AudioPlayer text={fullSummaryText} />
-                    <Button variant="default" size="sm" onClick={handleDownloadReport} disabled={isPdfLoading}>
-                        <FileDown className="mr-2 h-4 w-4" />
-                        {isPdfLoading ? "Generating..." : "Generate Report"}
-                    </Button>
                 </div>
             }>
                 <div className="space-y-4 text-base leading-relaxed">
