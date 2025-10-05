@@ -29,6 +29,15 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+
+    /* New Dark Theme for Landing Page */
+    --background-dark: 270 25% 6%; /* Deep dark purple/blue */
+    --foreground-dark: 240 20% 90%; /* Soft white */
+    --primary-dark: 180 100% 50%; /* Turquoise */
+    --primary-foreground-dark: 270 25% 6%;
+    --accent-dark: 320 100% 50%; /* Magenta */
+    --accent-foreground-dark: 270 25% 6%;
+    --muted-foreground-dark: 240 10% 60%;
   }
  
   .dark {

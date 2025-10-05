@@ -18,6 +18,8 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        futuristic:
+          "bg-primary-dark/10 text-primary-dark border-2 border-primary-dark/50 rounded-lg shadow-[0_0_2px_#fff,inset_0_0_2px_#fff,0_0_5px_#08f,0_0_15px_#08f,0_0_30px_#08f] hover:shadow-[0_0_2px_#fff,inset_0_0_2px_#fff,0_0_10px_#08f,0_0_30px_#08f,0_0_50px_#08f] transition-all duration-300",
       },
       size: {
         default: "h-10 px-4 py-2",

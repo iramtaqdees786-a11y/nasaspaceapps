@@ -20,7 +20,7 @@ export default function AppHeader({ mode, setMode }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card/80 backdrop-blur-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-3" prefetch={false}>
+        <Link href="/home" className="flex items-center gap-3" prefetch={false}>
           <Logo className="h-8 w-8 text-primary" />
           <h1 className="text-xl font-bold tracking-tight text-foreground">
             <span className="text-primary">Cell</span>estial
@@ -55,4 +55,7 @@ export default function AppHeader({ mode, setMode }: AppHeaderProps) {
             </ToggleGroupItem>
           </ToggleGroup>
         ) : <div className='w-44'/>}
-      
+      </div>
+    </header>
+  )
+}

@@ -8,7 +8,8 @@ const firebaseConfig = {
   projectId: "echochain-c95ac",
   storageBucket: "echochain-c95ac.appspot.com",
   messagingSenderId: "224029678513",
-  appId: "YOUR_APP_ID" // You can find this in your Firebase project settings
+  appId: "1:224029678513:web:aabfb66f23139c45773b90", // You can find this in your Firebase project settings
+  measurementId: "G-KMFEP9C0ZR"
 };
 
 // Initialize Firebase
