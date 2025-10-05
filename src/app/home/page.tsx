@@ -1,31 +1,14 @@
+
 import { Button } from '@/components/ui/button';
 import { Rocket, Telescope, Dna, FileCheck } from 'lucide-react';
 import Link from 'next/link';
+import AppHeader from '@/components/Header';
 
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-50 w-full border-b bg-card/80 backdrop-blur-sm">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <Rocket className="h-8 w-8 text-primary" />
-            <h1 className="text-xl font-bold tracking-tight">
-              <span className="text-primary">Cell</span>estial
-            </h1>
-          </div>
-          <nav className="flex items-center gap-4">
-            <Button asChild variant="ghost">
-                <Link href="/explorer">Explorer</Link>
-            </Button>
-            <Button asChild variant="ghost">
-                <Link href="/experimenters">Experimenters</Link>
-            </Button>
-            <Button asChild>
-                <Link href="/explorer">Launch App</Link>
-            </Button>
-          </nav>
-        </div>
-      </header>
+      {/* The AppHeader now includes mode/setMode props which are not used on this page, so we pass dummy values. */}
+      <AppHeader mode="K-12" setMode={() => {}} />
 
       <main className="flex-grow container mx-auto px-4 py-16 md:py-24 text-center">
         <h2 className="text-4xl md:text-6xl font-extrabold tracking-tighter mb-6">
