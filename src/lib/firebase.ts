@@ -1,19 +1,14 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 
-// TODO: Add your own Firebase configuration from the Firebase console.
-// 1. Go to https://console.firebase.google.com/
-// 2. Create a new project.
-// 3. Go to Project Settings > General tab.
-// 4. In the "Your apps" card, select the Web app icon (</>).
-// 5. Register your app and copy the firebaseConfig object here.
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDdfcC0mvPqMM-eqhEx2BLAsuvKOj2o9jQ",
+  authDomain: "echochain-c95ac.firebaseapp.com",
+  projectId: "echochain-c95ac",
+  storageBucket: "echochain-c95ac.appspot.com",
+  messagingSenderId: "224029678513",
+  appId: "YOUR_APP_ID" // You can find this in your Firebase project settings
 };
 
 // Initialize Firebase
