@@ -12,7 +12,7 @@ interface SciFiTypewriterProps {
 const SciFiTypewriter: React.FC<SciFiTypewriterProps> = ({ text, className }) => {
   const [displayedText, setDisplayedText] = useState('');
   const [isAnimating, setIsAnimating] = useState(true);
-  const elementRef = useRef<HTMLParagraphElement>(null);
+  const elementRef = useRef<HTMLSpanElement>(null);
   
   useEffect(() => {
     let frameRequest: number;
@@ -66,9 +66,9 @@ const SciFiTypewriter: React.FC<SciFiTypewriterProps> = ({ text, className }) =>
   }, [text]);
 
   return (
-    <p ref={elementRef} className={className}>
+    <span ref={elementRef} className={className}>
       {displayedText}
-    </p>
+    </span>
   );
 };
 
