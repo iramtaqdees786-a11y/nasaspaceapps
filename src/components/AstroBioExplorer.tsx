@@ -110,9 +110,8 @@ export default function AstroBioExplorer() {
     }
     if (e.key === 'Tab' && placeholder) {
         e.preventDefault();
-        setMode('K-12');
         setQuery(placeholder);
-        performSearch(placeholder, 'K-12');
+        performSearch(placeholder, mode);
     }
   }
 
