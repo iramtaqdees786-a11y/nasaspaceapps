@@ -162,8 +162,4 @@ export default function AstroBioExplorer() {
         />
       </main>
       <footer className="py-4 text-center text-sm text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} AstroBio Explorer. Powered by AI.</p>
-      </footer>
-    </div>
-  );
-}
+        <p>&copy; {new Date().getFullYear()} Cellestial. Powered by AI.</

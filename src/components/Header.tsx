@@ -23,15 +23,15 @@ export default function AppHeader({ mode, setMode }: AppHeaderProps) {
         <Link href="/" className="flex items-center gap-3" prefetch={false}>
           <Logo className="h-8 w-8 text-primary" />
           <h1 className="text-xl font-bold tracking-tight text-foreground">
-            AstroBio Explorer
+            <span className="text-primary">Cell</span>estial
           </h1>
         </Link>
         
         <nav className="hidden md:flex items-center gap-2">
-            <Button asChild variant={pathname === '/explorer' ? 'secondary' : 'ghost'}>
+            <Button asChild variant={pathname === '/explorer' ? 'secondary' : 'ghost'} prefetch={false}>
                 <Link href="/explorer" prefetch={false}>Explorer</Link>
             </Button>
-            <Button asChild variant={pathname === '/experimenters' ? 'secondary' : 'ghost'}>
+            <Button asChild variant={pathname === '/experimenters' ? 'secondary' : 'ghost'} prefetch={false}>
                 <Link href="/experimenters" prefetch={false}>Experimenters</Link>
             </Button>
         </nav>
@@ -55,7 +55,4 @@ export default function AppHeader({ mode, setMode }: AppHeaderProps) {
             </ToggleGroupItem>
           </ToggleGroup>
         ) : <div className='w-44'/>}
-      </div>
-    </header>
-  );
-}
+      

@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'AstroBio Explorer',
+  title: 'Cellestial',
   description: 'An AI-powered knowledge engine for NASA space biology experiments.',
 };
 

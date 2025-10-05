@@ -10,7 +10,7 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <Rocket className="h-8 w-8 text-primary" />
             <h1 className="text-xl font-bold tracking-tight">
-              AstroBio Explorer
+              <span className="text-primary">Cell</span>estial
             </h1>
           </div>
           <nav className="flex items-center gap-4">
@@ -80,7 +80,7 @@ export default function Home() {
       </section>
       
       <footer className="py-6 text-center text-sm text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} AstroBio Explorer. Your cosmic journey begins here.</p>
+        <p>&copy; {new Date().getFullYear()} Cellestial. Your cosmic journey begins here.</p>
       </footer>
     </div>
   );
