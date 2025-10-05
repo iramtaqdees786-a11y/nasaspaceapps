@@ -41,7 +41,7 @@ const prompt = ai.definePrompt({
   name: 'generatePdfReportPrompt',
   input: { schema: GeneratePdfReportInputSchema },
   output: { schema: GeneratePdfReportOutputSchema },
-  prompt: `You are an AI research assistant. Your task is to generate the complete text content for a detailed, multi-page scientific report based on the provided query. The report should be structured like a formal academic paper, at least 10 pages in length if printed.
+  prompt: `You are an AI research assistant. Your task is to generate the complete text content for a detailed scientific report based on the provided query. The report should be structured like a formal academic paper.
 
 Query: {{{query}}}
 
@@ -54,7 +54,7 @@ Please generate the following sections:
 - Results (describe the findings, referencing figures you will create)
 - Discussion (interpret the results and discuss implications)
 - Conclusion
-- References (list at least 10 real, relevant scientific papers in a standard citation format)
+- References (list at least 5 real, relevant scientific papers in a standard citation format)
 
 Additionally, define at least two figures (e.g., a chart or diagram) with a unique ID, detailed caption, and a plausible dataset. This data will be used to render the visuals.
 `,
