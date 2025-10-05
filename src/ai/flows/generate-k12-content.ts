@@ -8,6 +8,11 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
+const SourceDocumentSchema = z.object({
+  title: z.string().describe('The title of the source document.'),
+  url: z.string().describe('The direct URL to the source document (must be a real, accessible NASA link or a link to a scientific paper).'),
+});
+
 const QuizConceptSchema = z.object({
   id: z.string().describe("A unique identifier for the concept (e.g., 'c1')."),
   text: z.string().describe('The concept term.'),
@@ -36,7 +41,7 @@ const ActivitySchema = z.object({
 const ConceptMapNodeSchema = z.object({
     title: z.string().describe("The concept title."),
     details: z.string().describe("A brief, one-sentence detail about the concept."),
-    icon: z.enum(['dna', 'thermometer', 'clipboard-check', 'flask-conical']).describe("An appropriate icon name for the concept."),
+    icon: z.enum(['dna', 'thermometer', 'clipboard-check', 'flask-conical', 'rocket', 'atom', 'telescope', 'sprout']).describe("An appropriate icon name for the concept."),
 });
 
 const GlossaryTermSchema = z.object({
@@ -57,7 +62,7 @@ const K12OutputSchema = z.object({
   glossary: z.array(GlossaryTermSchema).length(5).describe('A list of exactly 5 key terms and their simple definitions.'),
   conceptMap: z.object({
     centralTopic: z.string().describe('The central topic of the concept map, which is the user\'s query.'),
-    relatedConcepts: z.array(ConceptMapNodeSchema).length(4).describe('An array of exactly 4 related concepts.'),
+    relatedConcepts: z.array(ConceptMapNodeSchema).length(6).describe('An array of exactly 6 related concepts.'),
   }),
   quiz: z.object({
     title: z.string().describe('A fun, engaging title for the quiz.'),
@@ -67,6 +72,7 @@ const K12OutputSchema = z.object({
   }),
   learningStyles: z.array(LearningStyleSchema).length(4).describe("An array of exactly 4 tailored suggestions, one for each learning style (Visual, Auditory, Reading/Writing, Kinesthetic)."),
   activities: z.array(ActivitySchema).length(2).describe('An array of exactly 2 creative and practical activities related to the topic.'),
+  sources: z.array(SourceDocumentSchema).min(2).describe('A list of at least 2 real source documents (preferably reports) used to generate the summary.'),
 });
 
 export type K12Result = z.infer<typeof K12OutputSchema>;
@@ -83,9 +89,11 @@ User Query: {{{query}}}
 
 **Instructions**:
 *   Generate all content to be engaging, simple, and suitable for a K-12 audience.
-*   The 'glossary', 'conceptMap', 'quiz', 'learningStyles', and 'activities' must be directly and creatively related to the user's query.
+*   The 'glossary', 'conceptMap', 'quiz', 'learningStyles', 'activities', and 'sources' must be directly and creatively related to the user's query.
+*   Ensure the concept map has exactly 6 related concepts.
 *   Ensure the quiz is a simple matching game with 4 concepts and 4 definitions.
 *   The analogy and memory trick should be fun and easy to remember.
+*   Provide at least 2 real source documents, preferably reports from NASA.
 
 Please generate the full output object according to the specified schema.`,
 });

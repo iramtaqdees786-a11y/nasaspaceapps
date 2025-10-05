@@ -1,14 +1,16 @@
 'use client';
 
-import type { K12Result, Concept, GlossaryTerm } from '@/app/actions';
+import type { K12Result, Concept } from '@/app/actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Lightbulb, BrainCircuit, Dna, Thermometer, ClipboardCheck, FlaskConical, Pencil, BookOpen, Ear, Video, Play, Volume2, Beaker, CheckCircle, XCircle, BookText } from 'lucide-react';
-import { useState, useTransition } from 'react';
+import { Download, Lightbulb, BrainCircuit, Dna, Thermometer, ClipboardCheck, FlaskConical, Pencil, BookOpen, Ear, Video, Play, Volume2, Beaker, CheckCircle, XCircle, BookText, Rocket, Atom, Telescope, Sprout, ExternalLink } from 'lucide-react';
+import { useState, useTransition, useEffect } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { getAudioSummary } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
+
 
 interface K12ResultsProps {
   data: K12Result;
@@ -24,32 +26,30 @@ const iconMap: { [key: string]: React.ElementType } = {
   ear: Ear,
   video: Video,
   beaker: Beaker,
+  rocket: Rocket,
+  atom: Atom,
+  telescope: Telescope,
+  sprout: Sprout
 };
 
-function ConceptNode({ concept, isCentral = false, position }: { concept: Concept | { title: string }, isCentral?: boolean, position?: string }) {
+function ConceptNode({ concept, isCentral = false, style }: { concept: Concept | { title: string }, isCentral?: boolean, style?: React.CSSProperties }) {
   const Icon = 'icon' in concept && concept.icon ? iconMap[concept.icon] : null;
-  const cardClasses = `text-center shadow-lg transition-transform hover:scale-105 w-48 ${isCentral ? 'bg-primary text-primary-foreground' : 'bg-card'}`;
+  const cardClasses = `text-center shadow-lg transition-transform hover:scale-105 w-36 h-36 flex flex-col justify-center ${isCentral ? 'bg-primary text-primary-foreground' : 'bg-card'}`;
   
-  const positions: { [key: string]: string } = {
-      'top': "top-0 left-1/2 -translate-x-1/2 -translate-y-full",
-      'bottom': "bottom-0 left-1/2 -translate-x-1/2 translate-y-full",
-      'left': "left-0 top-1/2 -translate-y-1/2 -translate-x-full",
-      'right': "right-0 top-1/2 -translate-y-1/2 translate-x-full",
-  };
-  const posClass = position ? positions[position] : 'top-0';
-
   return (
-    <div className={`absolute ${posClass}`}>
+    <div className="absolute" style={style}>
         <Card className={cardClasses}>
         <CardHeader className="pb-2">
-            <CardTitle className="text-base font-bold flex items-center justify-center gap-2">
-            {Icon && <Icon className="h-5 w-5" />}
-            {concept.title}
+            <div className="flex justify-center mb-2">
+                {Icon && <Icon className="h-6 w-6" />}
+            </div>
+            <CardTitle className="text-sm font-bold">
+                {concept.title}
             </CardTitle>
         </CardHeader>
         {'details' in concept && (
-            <CardContent>
-            <p className="text-sm text-muted-foreground">{concept.details}</p>
+            <CardContent className="px-2 pb-2">
+                <p className="text-xs text-muted-foreground">{concept.details}</p>
             </CardContent>
         )}
         </Card>
@@ -74,11 +74,21 @@ function LearningStrategy({ title, icon, children }: { title: string, icon: Reac
 }
 
 function MatchTheConceptsQuiz({ quiz }: { quiz: K12Result['quiz'] }) {
-    const [shuffledDefs, setShuffledDefs] = useState(() => [...quiz.definitions].sort(() => Math.random() - 0.5));
+    const [shuffledDefs, setShuffledDefs] = useState([...quiz.definitions]);
     const [selectedConcept, setSelectedConcept] = useState<string | null>(null);
     const [matches, setMatches] = useState<Record<string, string>>({});
     const [results, setResults] = useState<Record<string, boolean>>({});
     const [isFinished, setIsFinished] = useState(false);
+
+    // Shuffle definitions whenever the quiz data changes
+    useEffect(() => {
+        setShuffledDefs([...quiz.definitions].sort(() => Math.random() - 0.5));
+        setMatches({});
+        setResults({});
+        setSelectedConcept(null);
+        setIsFinished(false);
+    }, [quiz]);
+
 
     const handleConceptClick = (conceptId: string) => {
         if (isFinished || matches[conceptId]) return;
@@ -99,14 +109,14 @@ function MatchTheConceptsQuiz({ quiz }: { quiz: K12Result['quiz'] }) {
             newResults[pair.conceptId] = matches[pair.conceptId] === pair.definitionId;
         });
         setResults(newResults);
-setIsFinished(true);
+        setIsFinished(true);
     };
 
     const resetQuiz = () => {
+        setIsFinished(false);
+        setSelectedConcept(null);
         setMatches({});
         setResults({});
-        setSelectedConcept(null);
-        setIsFinished(false);
         setShuffledDefs([...quiz.definitions].sort(() => Math.random() - 0.5));
     };
     
@@ -121,6 +131,7 @@ setIsFinished(true);
             <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
                     <div className="flex flex-col gap-2">
+                        <p className="text-sm font-semibold text-muted-foreground text-center">Concepts</p>
                         {quiz.concepts.map(concept => (
                             <Button
                                 key={concept.id}
@@ -138,6 +149,7 @@ setIsFinished(true);
                         ))}
                     </div>
                     <div className="flex flex-col gap-2">
+                        <p className="text-sm font-semibold text-muted-foreground text-center">Definitions</p>
                          {shuffledDefs.map(def => (
                             <Button
                                 key={def.id}
@@ -168,7 +180,7 @@ setIsFinished(true);
     );
 }
 
-function Glossary({ terms }: { terms: GlossaryTerm[] }) {
+function Glossary({ terms }: { terms: K12Result['glossary'] }) {
     if (!terms || terms.length === 0) return null;
     return (
         <Card>
@@ -184,6 +196,36 @@ function Glossary({ terms }: { terms: GlossaryTerm[] }) {
                     {terms.map(term => (
                         <li key={term.term} className="text-sm border-l-4 border-accent/50 pl-3">
                            <strong className="font-bold text-foreground">{term.term}:</strong> {term.definition}
+                        </li>
+                    ))}
+                </ul>
+            </CardContent>
+        </Card>
+    )
+}
+
+function Sources({ sources }: { sources: K12Result['sources'] }) {
+    if (!sources || sources.length === 0) return null;
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                    <BookOpen className="h-6 w-6" />
+                    Sources
+                </CardTitle>
+                <CardDescription>The information was generated using these sources.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <ul className="space-y-2">
+                    {sources.map(source => (
+                        <li key={source.url}>
+                            <Button asChild variant="link" className="p-0 h-auto text-base">
+                                <Link href={source.url} target="_blank" rel="noopener noreferrer">
+                                    {source.title}
+                                    <ExternalLink className="ml-2 h-4 w-4" />
+                                </Link>
+                            </Button>
                         </li>
                     ))}
                 </ul>
@@ -228,7 +270,16 @@ export default function K12Results({ data }: K12ResultsProps) {
         });
     };
     
-    const conceptPositions = ["top", "right", "bottom", "left"];
+    const getHexPosition = (index: number, radius: number, total: number): React.CSSProperties => {
+        const angle = (Math.PI / 3) * index;
+        const x = radius * Math.cos(angle);
+        const y = radius * Math.sin(angle);
+        return {
+            left: `calc(50% + ${x}px)`,
+            top: `calc(50% + ${y}px)`,
+            transform: 'translate(-50%, -50%)',
+        };
+    };
 
   return (
     <div className="space-y-8">
@@ -239,10 +290,6 @@ export default function K12Results({ data }: K12ResultsProps) {
             <Button variant="outline" size="sm" onClick={handlePlayAudio} disabled={isAudioLoading}>
                 {isAudioLoading ? 'Loading...' : (audioSrc ? <Volume2 className="mr-2 h-4 w-4"/> : <Play className="mr-2 h-4 w-4" />)}
                 Listen
-            </Button>
-            <Button variant="outline" size="sm">
-                <Download className="mr-2 h-4 w-4" />
-                Download
             </Button>
           </div>
         </CardHeader>
@@ -331,22 +378,27 @@ export default function K12Results({ data }: K12ResultsProps) {
       </div>
       
       <div>
-        <h3 className="text-2xl font-bold text-center mb-12">Concept Map</h3>
-        <div className="relative h-96 w-full max-w-3xl mx-auto my-24">
+        <h3 className="text-2xl font-bold text-center mb-6">Concept Map</h3>
+        <div className="relative h-[450px] w-full max-w-3xl mx-auto my-12">
             <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                <line x1="50%" y1="50%" x2="50%" y2="0" stroke="hsl(var(--border))" strokeDasharray="4" strokeWidth="2" />
-                <line x1="50%" y1="50%" x2="100%" y2="50%" stroke="hsl(var(--border))" strokeDasharray="4" strokeWidth="2" />
-                <line x1="50%" y1="50%" x2="50%" y2="100%" stroke="hsl(var(--border))" strokeDasharray="4" strokeWidth="2" />
-                <line x1="50%" y1="50%" x2="0" y2="50%" stroke="hsl(var(--border))" strokeDasharray="4" strokeWidth="2" />
+                {data.conceptMap.relatedConcepts.map((_, index) => {
+                     const radius = 175;
+                     const angle = (Math.PI / 3) * index;
+                     const x2 = 50 + (radius / (450/2)) * Math.cos(angle) * 50;
+                     const y2 = 50 + (radius / (450/2)) * Math.sin(angle) * 50;
+                     return <line key={index} x1="50%" y1="50%" x2={`${x2}%`} y2={`${y2}%`} stroke="hsl(var(--border))" strokeDasharray="4" strokeWidth="2" />
+                })}
             </svg>
             <div className="relative w-full h-full flex justify-center items-center">
-                <ConceptNode concept={{ title: data.conceptMap.centralTopic }} isCentral={true} />
+                <ConceptNode concept={{ title: data.conceptMap.centralTopic }} isCentral={true} style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }} />
                 {data.conceptMap.relatedConcepts.map((concept, index) => (
-                    <ConceptNode key={index} concept={concept} position={conceptPositions[index % conceptPositions.length]} />
+                    <ConceptNode key={index} concept={concept} style={getHexPosition(index, 175, 6)} />
                 ))}
             </div>
         </div>
       </div>
+
+      <Sources sources={data.sources} />
     </div>
   );
 }
