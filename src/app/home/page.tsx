@@ -1,3 +1,4 @@
+'use client';
 
 import { Button } from '@/components/ui/button';
 import { Rocket, Telescope, Dna, FileCheck } from 'lucide-react';
