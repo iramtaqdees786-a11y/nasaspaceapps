@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useTransition, useEffect, useCallback } from 'react';
+import { useState, useTransition, useEffect, useCallback, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search } from 'lucide-react';
+import { Search, Keyboard } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast"
 
 import AppHeader from '@/components/Header';
@@ -11,14 +11,39 @@ import ResultsDisplay from '@/components/ResultsDisplay';
 import type { DailyFeature, SearchResult } from '@/app/actions';
 import { getExperimentData, fetchDailyFeature } from '@/app/actions';
 
+const searchSuggestions = [
+  'tardigrades in space',
+  'plant growth in microgravity',
+  'rodent research on the ISS',
+  'effects of cosmic radiation on DNA',
+  'fruit fly experiments in space',
+  'growing lettuce on the space station',
+  'microbes on the ISS exterior',
+  'astronaut muscle loss',
+  'space-grown crystals for medicine',
+  'salmonella virulence in space',
+  'human microbiome in spaceflight',
+];
+
+
 export default function AstroBioExplorer() {
   const [mode, setMode] = useState<'K-12' | 'Pro'>('K-12');
   const [query, setQuery] = useState('');
+  const [placeholder, setPlaceholder] = useState(searchSuggestions[0]);
   const [submittedQuery, setSubmittedQuery] = useState('');
   const [results, setResults] = useState<SearchResult | null>(null);
   const [dailyFeature, setDailyFeature] = useState<DailyFeature | null>(null);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const suggestionIndex = useRef(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      suggestionIndex.current = (suggestionIndex.current + 1) % searchSuggestions.length;
+      setPlaceholder(searchSuggestions[suggestionIndex.current]);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     async function loadDailyFeature() {
@@ -29,7 +54,7 @@ export default function AstroBioExplorer() {
     loadDailyFeature();
   }, [mode]);
 
-  const performSearch = useCallback((currentQuery: string) => {
+  const performSearch = useCallback((currentQuery: string, searchMode: 'K-12' | 'Pro') => {
     if (!currentQuery.trim()) {
       toast({
         title: "Search field is empty",
@@ -44,7 +69,7 @@ export default function AstroBioExplorer() {
 
     startTransition(async () => {
       try {
-        const data = await getExperimentData(currentQuery, mode);
+        const data = await getExperimentData(currentQuery, searchMode);
         setResults(data);
       } catch (error) {
         let message = 'An unknown error occurred.';
@@ -59,23 +84,35 @@ export default function AstroBioExplorer() {
         })
       }
     });
-  }, [mode, toast]);
+  }, [toast]);
 
 
   const handleSearch = () => {
-    performSearch(query);
+    performSearch(query, mode);
   };
   
   const handleDailyFeatureSearch = (topic: string) => {
     setQuery(topic);
-    performSearch(topic);
+    performSearch(topic, mode);
   }
 
   const handleModeChange = (newMode: 'K-12' | 'Pro') => {
     setMode(newMode);
     // If there's a result, re-fetch for the new mode
     if (submittedQuery) {
-        performSearch(submittedQuery);
+        performSearch(submittedQuery, newMode);
+    }
+  }
+  
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+        handleSearch();
+    }
+    if (e.key === 'Tab' && placeholder) {
+        e.preventDefault();
+        setMode('K-12');
+        setQuery(placeholder);
+        performSearch(placeholder, 'K-12');
     }
   }
 
@@ -91,10 +128,10 @@ export default function AstroBioExplorer() {
           <div className="flex w-full items-center space-x-2">
             <Input
               type="text"
-              placeholder="e.g., 'plant growth in microgravity'"
+              placeholder={`e.g., '${placeholder}'`}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyDown={handleKeyDown}
               className="text-base"
               aria-label="Search for space biology experiments"
             />
@@ -106,6 +143,13 @@ export default function AstroBioExplorer() {
             >
               <Search className="h-5 w-5" />
             </Button>
+          </div>
+           <div className="mt-2 text-xs text-muted-foreground flex items-center justify-center">
+            Press
+            <kbd className="mx-2 flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium">
+                <Keyboard className='h-3 w-3'/> Tab
+            </kbd>
+            to search for the suggested topic.
           </div>
         </div>
         

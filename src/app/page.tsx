@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Rocket, Telescope, Dna, FileCheck } from 'lucide-react';
+import { Rocket, Telescope, Dna, FileCheck, Keyboard } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
