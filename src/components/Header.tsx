@@ -21,7 +21,9 @@ export default function AppHeader({ mode, setMode }: AppHeaderProps) {
     <header className="sticky top-0 z-50 w-full border-b bg-card/80 backdrop-blur-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/home" className="flex items-center gap-3" prefetch={false}>
-          <Logo className="h-8 w-8 text-primary" />
+          <div className="h-8 w-8">
+            <Logo />
+          </div>
           <h1 className="text-xl font-bold tracking-tight text-foreground">
             <span className="text-primary">Cell</span>estial
           </h1>

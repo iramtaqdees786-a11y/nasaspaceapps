@@ -1,13 +1,9 @@
-// This is the new landing page component.
-// I am keeping the old page content in a separate file `src/app/home/page.tsx`
-// and will create the new landing page experience here.
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Starfield from '@/components/landing/Starfield';
-import InteractiveLogo from '@/components/landing/InteractiveLogo';
+import Logo from '@/components/Logo';
 import Typewriter from '@/components/landing/Typewriter';
 import SciFiTypewriter from '@/components/landing/SciFiTypewriter';
 import { Button } from '@/components/ui/button';
@@ -49,7 +45,7 @@ export default function LandingPage() {
               transition={{ duration: 0.5 }}
               className="flex flex-col items-center justify-center text-center p-4"
             >
-              <InteractiveLogo />
+              <Logo />
               <h1 className="font-headline text-4xl md:text-6xl font-bold mt-8">
                 <Typewriter text="Cellestial: Where Cells Meet the Cosmos" />
               </h1>
