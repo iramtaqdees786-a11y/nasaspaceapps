@@ -3,11 +3,8 @@
 import type { ProResult, SourceDocument } from '@/app/actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { LineChart as LineChartIcon, BarChart2, TestTube, ChevronsUp, MessageSquareQuote, Play, Volume2, Pause, Users, Calendar, Radiation } from 'lucide-react';
+import { LineChart as LineChartIcon, BarChart2, TestTube, Users, Calendar, Radiation } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { useState, useTransition, useRef } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { getAudioSummary } from '@/app/actions';
 import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ProResultsProps {
@@ -35,67 +32,7 @@ function SectionCard({ title, icon, description, children, actions }: { title: s
     );
 }
 
-function AudioPlayer({ text }: { text: string }) {
-    const [audioSrc, setAudioSrc] = useState<string | null>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [isLoading, startTransition] = useTransition();
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-    const { toast } = useToast();
-
-    const handlePlayPause = async () => {
-        if (isPlaying) {
-            audioRef.current?.pause();
-            setIsPlaying(false);
-            return;
-        }
-
-        if (audioSrc) {
-            audioRef.current?.play();
-            setIsPlaying(true);
-            return;
-        }
-
-        startTransition(async () => {
-            try {
-                const result = await getAudioSummary(text);
-                setAudioSrc(result.media);
-                const audio = new Audio(result.media);
-                audioRef.current = audio;
-                audio.play();
-                audio.onended = () => setIsPlaying(false);
-                setIsPlaying(true);
-            } catch (error) {
-                toast({
-                    title: "Audio Error",
-                    description: "Could not generate audio for the summary.",
-                    variant: "destructive",
-                });
-            }
-        });
-    };
-    
-    let Icon, buttonText;
-    if (isLoading) {
-        Icon = Volume2;
-        buttonText = 'Generating...';
-    } else if (isPlaying) {
-        Icon = Pause;
-        buttonText = 'Pause';
-    } else {
-        Icon = Play;
-        buttonText = 'Listen';
-    }
-
-    return (
-        <Button variant="outline" size="sm" onClick={handlePlayPause} disabled={isLoading}>
-            <Icon className="mr-2 h-4 w-4" />
-            {buttonText}
-        </Button>
-    );
-}
-
 export default function ProResults({ data, query }: ProResultsProps) {
-    const { toast } = useToast();
 
     const renderSummaryWithCitations = (summary: string, sources: SourceDocument[]) => {
         const parts = summary.split(/(\[\d+\])/g);
@@ -126,7 +63,6 @@ export default function ProResults({ data, query }: ProResultsProps) {
         });
     };
 
-    const fullSummaryText = `${data.introduction}\n\n${data.summary}\n\n${data.conclusion}`;
     const keyMetricIcons: { [key: string]: React.ReactNode } = {
         'sample': <Users className="h-5 w-5 text-muted-foreground" />,
         'duration': <Calendar className="h-5 w-5 text-muted-foreground" />,
@@ -144,11 +80,7 @@ export default function ProResults({ data, query }: ProResultsProps) {
   return (
     <div className="flex flex-col md:flex-row gap-8">
         <div className="flex-grow space-y-6">
-            <SectionCard title="Technical Report" icon={<TestTube className="h-6 w-6" />} actions={
-                <div className="flex items-center gap-2">
-                    <AudioPlayer text={fullSummaryText} />
-                </div>
-            }>
+            <SectionCard title="Technical Report" icon={<TestTube className="h-6 w-6" />}>
                 <div className="space-y-4 text-base leading-relaxed">
                     <p><strong>Introduction:</strong> {data.introduction}</p>
                     <p>{renderSummaryWithCitations(data.summary, data.sources)}</p>
