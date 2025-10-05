@@ -45,4 +45,8 @@ export default function ExperimentersPage() {
         </Tabs>
       </main>
       <footer className="py-4 text-center text-sm text-muted-foreground">
-        <p>&copy; {new Date
+        <p>&copy; {new Date().getFullYear()} Cellestial. AI-Powered Analysis.</p>
+      </footer>
+    </div>
+  );
+}
