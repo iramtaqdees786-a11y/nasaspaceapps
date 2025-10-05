@@ -10,7 +10,6 @@ import { getAudioSummary } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import Image from 'next/image';
 
 
 interface K12ResultsProps {
@@ -317,16 +316,7 @@ export default function K12Results({ data }: K12ResultsProps) {
 
   return (
     <div className="space-y-8">
-        <Card className="shadow-lg overflow-hidden">
-            <div className="relative w-full h-64 md:h-80">
-                <Image
-                    src={data.imageUrl}
-                    alt={data.conceptMap.centralTopic}
-                    fill
-                    className="object-cover"
-                />
-                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-            </div>
+      <Card className="shadow-lg overflow-hidden">
             <div className="relative p-6">
                 <CardHeader className="p-0 mb-4 flex flex-row items-center justify-between">
                     <CardTitle className="text-2xl">Experiment Overview</CardTitle>
