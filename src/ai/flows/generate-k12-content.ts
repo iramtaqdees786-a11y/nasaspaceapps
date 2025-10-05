@@ -59,20 +59,20 @@ const K12OutputSchema = z.object({
   conclusion: z.string().describe('A short concluding paragraph.'),
   analogy: z.string().describe('A fun and memorable analogy to help students understand the experiment.'),
   memoryTrick: z.string().describe('A memory trick or mnemonic device to help students remember a key concept.'),
-  glossary: z.array(GlossaryTermSchema).length(5).describe('A list of exactly 5 key terms and their simple definitions.'),
+  glossary: z.array(GlossaryTermSchema).describe('A list of key terms and their simple definitions.'),
   conceptMap: z.object({
     centralTopic: z.string().describe('The central topic of the concept map, which is the user\'s query.'),
-    relatedConcepts: z.array(ConceptMapNodeSchema).length(6).describe('An array of exactly 6 related concepts.'),
+    relatedConcepts: z.array(ConceptMapNodeSchema).describe('An array of related concepts.'),
   }),
   quiz: z.object({
     title: z.string().describe('A fun, engaging title for the quiz.'),
-    concepts: z.array(QuizConceptSchema).length(4).describe('An array of exactly 4 concepts for the matching game.'),
-    definitions: z.array(QuizDefinitionSchema).length(4).describe('An array of exactly 4 definitions corresponding to the concepts.'),
-    correctPairs: z.array(CorrectPairSchema).length(4).describe('An array of objects mapping concept IDs to their correct definition IDs.'),
+    concepts: z.array(QuizConceptSchema).describe('An array of concepts for the matching game.'),
+    definitions: z.array(QuizDefinitionSchema).describe('An array of definitions corresponding to the concepts.'),
+    correctPairs: z.array(CorrectPairSchema).describe('An array of objects mapping concept IDs to their correct definition IDs.'),
   }),
-  learningStyles: z.array(LearningStyleSchema).length(4).describe("An array of exactly 4 tailored suggestions, one for each learning style (Visual, Auditory, Reading/Writing, Kinesthetic)."),
-  activities: z.array(ActivitySchema).length(2).describe('An array of exactly 2 creative and practical activities related to the topic.'),
-  sources: z.array(SourceDocumentSchema).min(2).describe('A list of at least 2 real source documents (preferably reports) used to generate the summary.'),
+  learningStyles: z.array(LearningStyleSchema).describe("An array of tailored suggestions for different learning styles."),
+  activities: z.array(ActivitySchema).describe('An array of creative and practical activities related to the topic.'),
+  sources: z.array(SourceDocumentSchema).describe('A list of real source documents (preferably reports) used to generate the summary.'),
 });
 
 export type K12Result = z.infer<typeof K12OutputSchema>;
@@ -90,10 +90,8 @@ User Query: {{{query}}}
 **Instructions**:
 *   Generate all content to be engaging, simple, and suitable for a K-12 audience.
 *   The 'glossary', 'conceptMap', 'quiz', 'learningStyles', 'activities', and 'sources' must be directly and creatively related to the user's query.
-*   Ensure the concept map has exactly 6 related concepts.
-*   Ensure the quiz is a simple matching game with 4 concepts and 4 definitions.
+*   Generate about 5 glossary terms, 6 concept map nodes, a 4x4 quiz, 2 activities, and at least 2 sources.
 *   The analogy and memory trick should be fun and easy to remember.
-*   Provide at least 2 real source documents, preferably reports from NASA.
 
 Please generate the full output object according to the specified schema.`,
 });
